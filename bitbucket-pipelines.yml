@@ -1,0 +1,70 @@
+image: cypress/browsers:node-20.6.1-chrome-118.0.5993.88-1-ff-118.0.2-edge-118.0.2088.46-1
+
+options:
+  size: 2x
+
+definitions:
+  caches:
+    npm: $HOME/.npm
+    cypress: $HOME/.cache/Cypress
+
+pipelines:
+  custom:
+    cypress-night-testing:
+    - step:
+        name: Run Cypress OnlineCheckInSettingsSuite
+        size: 2x
+        caches:
+          - node
+          - npm
+          - cypress
+        script:
+          - npm ci
+          - npx cypress run --headed --browser chrome --spec cypress/e2e/OnlineCheckInSettingsSuite
+        artifacts:
+          - cypress/screenshots/**
+          - cypress/videos/**
+          - cypress/reports/html/**
+        after-script:
+          - DATE=$(date '+%B_%Oe_%Y'| sed 's/ //') 
+          - DAILY_REPORT=Report-$DATE-report.html
+          - pipe: atlassian/email-notify:0.11.0
+            variables:
+              USERNAME: $SMTP_USERNAME
+              PASSWORD: $SMTP_PASSWORD
+              FROM: $SENDER
+              TO: $RECEIVERS
+              HOST: 'email-smtp.us-east-1.amazonaws.com'
+              PORT: '587'
+              SUBJECT: 'Test Automation OnlineCheckInSettingsSuite Daily Report'
+              ATTACHMENTS: 'cypress/reports/html/${DAILY_REPORT}'
+              DEBUG: 'true'
+
+    - step:
+        name: Run Cypress PreCheckInProcessSuite
+        size: 2x
+        caches:
+          - node
+          - npm
+          - cypress
+        script:
+          - npm ci
+          - npx cypress run --headed --browser chrome --spec cypress/e2e/PreCheckInProcessSuite
+        artifacts:
+          - cypress/screenshots/**
+          - cypress/videos/**
+          - cypress/reports/html/**
+        after-script:
+          - DATE=$(date '+%B_%Oe_%Y'| sed 's/ //') 
+          - DAILY_REPORT=Report-$DATE-report.html
+          - pipe: atlassian/email-notify:0.11.0
+            variables:
+              USERNAME: $SMTP_USERNAME
+              PASSWORD: $SMTP_PASSWORD
+              FROM: $SENDER
+              TO: $RECEIVERS
+              HOST: 'email-smtp.us-east-1.amazonaws.com'
+              PORT: '587'
+              SUBJECT: 'Test Automation PreCheckInProcessSuite Daily Report'
+              ATTACHMENTS: 'cypress/reports/html/${DAILY_REPORT}'
+              DEBUG: 'true'

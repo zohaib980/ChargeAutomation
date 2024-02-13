@@ -1,0 +1,34 @@
+{
+  "name": "chargeautomation",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "open": "cypress open",
+    "test-electron": "cypress run",
+    "test-electron-headed": "cypress run --headed",
+    "report-chrome": "npx cypress run --browser chrome",
+    "report-chrome-headed": "npx cypress run --headed --browser chrome",
+    "test-dashboard": "npx cypress run --record --key 9f288ec8-7468-4b13-a722-75b14fcf5418 --browser chrome --headed"
+  },
+  "author": "Waqas",
+  "license": "ISC",
+  "devDependencies": {
+    "@4tw/cypress-drag-drop": "^2.2.5",
+    "cypress": "^13.6.3",
+    "cypress-file-upload": "^5.0.8",
+    "cypress-if": "^1.12.0",
+    "cypress-iframe": "^1.0.1",
+    "cypress-mochawesome-reporter": "^3.6.1",
+    "cypress-plugin-stripe-elements": "^1.0.2",
+    "cypress-wait-until": "^3.0.1",
+    "cypress-xpath": "^2.0.1"
+  },
+  "compilerOptions": {
+    "types": [
+      "cypress",
+      "cypress-plugin-stripe-elements",
+      "@4tw/cypress-drag-drop"
+    ]
+  }
+}
