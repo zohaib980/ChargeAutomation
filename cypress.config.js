@@ -44,15 +44,15 @@ module.exports = defineConfig({
       runMode: 0,
       openMode: 0
     },
-    baseUrl: 'https://master.chargeautomation.com/',
+    baseUrl: 'https://mster.cargeautomation.com/',
     users: {
       user1: {
-        username: "automation9462@gmail.com",
-        password: "Boring321"
+        username: "automation9@gmail.com",
+        password: ""
       },
       user2: {
-        username: "automationca2@yopmail.com",
-        password: "Boring321"
+        username: "automationc@yopmail.com",
+        password: ""
       }
     },
     chromeWebSecurity: false,
