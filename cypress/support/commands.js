@@ -23,9 +23,19 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+
+// Custom command to handle iframes
+Cypress.Commands.add('getIframeBody', (iframeSelector) => {
+    return cy
+        .get(iframeSelector)
+        .its('0.contentDocument.body')
+        .then(cy.wrap);
+})
+
 import 'cypress-file-upload';
 require('@4tw/cypress-drag-drop')
 require('cypress-xpath');
 import 'cypress-if'
 import 'cypress-wait-until';
 import 'cypress-xpath'
+import 'cypress-iframe'

@@ -15,14 +15,17 @@
   "license": "ISC",
   "devDependencies": {
     "@4tw/cypress-drag-drop": "^2.2.5",
-    "cypress": "^13.6.3",
+    "@types/mysql": "^2.15.26",
+    "cypress": "^13.13.0",
     "cypress-file-upload": "^5.0.8",
     "cypress-if": "^1.12.0",
     "cypress-iframe": "^1.0.1",
     "cypress-mochawesome-reporter": "^3.6.1",
     "cypress-plugin-stripe-elements": "^1.0.2",
+    "cypress-sql-server": "^1.0.0",
     "cypress-wait-until": "^3.0.1",
-    "cypress-xpath": "^2.0.1"
+    "cypress-xpath": "^2.0.1",
+    "mysql": "github:mysqljs/mysql"
   },
   "compilerOptions": {
     "types": [
@@ -30,5 +33,10 @@
       "cypress-plugin-stripe-elements",
       "@4tw/cypress-drag-drop"
     ]
+  },
+  "dependencies": {
+    "cypress-mysql": "^1.0.2",
+    "lodash": "^4.17.21",
+    "ssh2": "^1.15.0"
   }
 }
