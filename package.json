@@ -15,8 +15,9 @@
   "license": "ISC",
   "devDependencies": {
     "@4tw/cypress-drag-drop": "^2.2.5",
+    "@types/cypress": "^1.1.6",
     "@types/mysql": "^2.15.26",
-    "cypress": "^13.13.0",
+    "cypress": "^13.16.0",
     "cypress-file-upload": "^5.0.8",
     "cypress-if": "^1.12.0",
     "cypress-iframe": "^1.0.1",

@@ -8,11 +8,16 @@ const fs = require('fs');
 const privateKey = fs.readFileSync('id_rsa', 'utf8');
 
 module.exports = defineConfig({
+  viewportWidth: 1280,  // Set your desired width
+  viewportHeight: 720,  // Set your desired height
+  env: {
+    environment: 'master',
+  },
   projectId: 'rbj641',
   reporter: 'cypress-mochawesome-reporter',
   reporterOptions: {
     charts: true,
-    reportPageTitle: 'custom-title',
+    reportPageTitle: 'CA Automation Report',
     embeddedScreenshots: true,
     inlineAssets: true,
     saveAllAttempts: true,
@@ -44,15 +49,19 @@ module.exports = defineConfig({
       runMode: 0,
       openMode: 0
     },
-    baseUrl: 'https://mster.cargeautomation.com/',
+    baseUrl: 'https://master.chargeautomation.com/',
     users: {
       user1: {
-        username: "automation9@gmail.com",
-        password: ""
+        username: "automation9462@gmail.com",
+        password: "Boring321"
       },
       user2: {
-        username: "automationc@yopmail.com",
-        password: ""
+        username: "automationca2@yopmail.com",
+        password: "Boring321"
+      },
+      user3: {
+        username: "hannahgratt@yopmail.com",
+        password: "Boring321"
       }
     },
     chromeWebSecurity: false,

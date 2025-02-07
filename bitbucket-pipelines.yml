@@ -19,8 +19,11 @@ pipelines:
           - npm
           - cypress
         script:
+          - apt-get update && apt-get install -y tzdata
+          - export TZ=UTC
+          - date
           - npm ci
-          - npx cypress run --record --headed --browser chrome --spec "cypress/e2e/OnlineCheckInSettingsSuite"
+          - npx cypress run --record --headed --browser chrome --spec "cypress/e2e/GuestExperienceSettingsSuite,cypress/e2e/PaymentGateways"
         artifacts:
           - cypress/screenshots/**
           - cypress/videos/**
@@ -28,7 +31,7 @@ pipelines:
         after-script:
           - DATE=$(date '+%B_%Oe_%Y'| sed 's/ //') 
           - DAILY_REPORT=Report-$DATE-report.html
-          - pipe: atlassian/email-notify:0.11.0
+          - pipe: atlassian/email-notify:0.13.2
             variables:
               USERNAME: $SMTP_USERNAME
               PASSWORD: $SMTP_PASSWORD
@@ -49,6 +52,9 @@ pipelines:
           - npm
           - cypress
         script:
+          - apt-get update && apt-get install -y tzdata
+          - export TZ=UTC
+          - date
           - npm ci
           - npx cypress run --record --headed --browser chrome --spec cypress/e2e/PreCheckInProcessSuite
         artifacts:
@@ -58,7 +64,7 @@ pipelines:
         after-script:
           - DATE=$(date '+%B_%Oe_%Y'| sed 's/ //') 
           - DAILY_REPORT=Report-$DATE-report.html
-          - pipe: atlassian/email-notify:0.11.0
+          - pipe: atlassian/email-notify:0.13.2
             variables:
               USERNAME: $SMTP_USERNAME
               PASSWORD: $SMTP_PASSWORD
@@ -79,9 +85,12 @@ pipelines:
           - npm
           - cypress
         script:
+          - apt-get update && apt-get install -y tzdata
+          - export TZ=UTC
+          - date
           - chmod 600 ./id_rsa # This is to give permission to the private key for ssh tunnel
           - npm ci
-          - npx cypress run --record --headed --browser chrome --spec "cypress/e2e/BookingsTestSuite,cypress/e2e/SubscriptionsFlows"
+          - npx cypress run --record --headed --browser chrome --spec "cypress/e2e/SubscriptionsFlows,cypress/e2e/BookingsTestSuite,cypress/e2e/AdditionalChargesOnBooking,cypress/e2e/BookingDetailCases,cypress/e2e/BookingListingTestCases"
         artifacts:
           - cypress/screenshots/**
           - cypress/videos/**
@@ -89,7 +98,7 @@ pipelines:
         after-script:
           - DATE=$(date '+%B_%Oe_%Y'| sed 's/ //') 
           - DAILY_REPORT=Report-$DATE-report.html
-          - pipe: atlassian/email-notify:0.11.0
+          - pipe: atlassian/email-notify:0.13.2
             variables:
               USERNAME: $SMTP_USERNAME
               PASSWORD: $SMTP_PASSWORD
@@ -110,8 +119,11 @@ pipelines:
           - npm
           - cypress
         script:
+          - apt-get update && apt-get install -y tzdata
+          - export TZ=UTC
+          - date
           - npm ci
-          - npx cypress run --record --headed --browser chrome --spec "cypress/e2e/AutoPaymentsSuite"
+          - npx cypress run --record --headed --browser chrome --spec "cypress/e2e/AutoPaymentsSuite,cypress/e2e/GuestPortalSuite"
         artifacts:
           - cypress/screenshots/**
           - cypress/videos/**
@@ -119,7 +131,7 @@ pipelines:
         after-script:
           - DATE=$(date '+%B_%Oe_%Y'| sed 's/ //') 
           - DAILY_REPORT=Report-$DATE-report.html
-          - pipe: atlassian/email-notify:0.11.0
+          - pipe: atlassian/email-notify:0.13.2
             variables:
               USERNAME: $SMTP_USERNAME
               PASSWORD: $SMTP_PASSWORD

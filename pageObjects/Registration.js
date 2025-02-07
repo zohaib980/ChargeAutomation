@@ -7,18 +7,21 @@ const loginPage = new LoginPage
 
 export class Registration {
     goToRegistration() {
-        cy.visit('https://master.chargeautomation.com/')
-        cy.get('[class="intro white-text"]').should('be.visible').and('contain.text', 'Powerful Payment Processing')
+        cy.visit('/register')
+        /*
+        cy.get('[class="intro white-text"]').should('be.visible').and('contain.text', 'Streamline check-ins, maximize upsells, elevate every stay')
         cy.get('[class="white-text"]').should('contain.text', "Automate your credit card charging process for all your bookings. For hotels, B&B's, holiday homes, vacation rentals, hostels, agencies.")
         cy.get('.register-button').eq(0).should('be.visible').and('contain.text', 'Log In')
-        cy.get('.register-button').eq(1).should('be.visible').and('contain.text', 'Register').click() //Register
+        cy.get('.register-button').eq(1).should('be.visible').and('contain.text', 'Signup').click()
+        */
         cy.url().should('include', '/register')
+        cy.get('h2').should('be.visible').and('contain.text', 'Signup')
     }
     newRegistration(clientName, companyName, phoneNo, clientEmail, clientPassword, planType) {
-        //Register page
+        //Signup page
         cy.get('.signup-area__guest-text').should('be.visible').and('contain.text', 'Are you a Guest?')
         cy.get('.signup-area__guest-btn').should('be.visible').and('contain.text', 'Click Here') //Click Here
-        cy.get('.signup-upper').should('be.visible').and('contain.text', 'Sign Up').and('contain.text', 'Please fill in this form to create an account')
+        cy.get('.signup-upper').should('be.visible').and('contain.text', 'Signup').and('contain.text', 'Please fill in this form to create an account')
         cy.get('.inner-left').should('contain.text', 'Online Check-in').and('contain.text', 'Payment Automation').and('contain.text', 'Chargeback Protection')
             .and('contain.text', 'Upsell').and('contain.text', 'Smart Guidebook')
 
@@ -37,7 +40,7 @@ export class Registration {
         cy.get('[id="signupbtn"]').should('be.visible').and('contain.value', 'Get Started') // GET STARTED
 
         // First, make a GET request to the page to get the CSRF token
-        cy.request('GET', 'https://master.chargeautomation.com/register').then((response) => {
+        cy.request('GET', '/register').then((response) => {
 
             const html = response.body;
             const parser = new DOMParser();
@@ -49,14 +52,14 @@ export class Registration {
             // Use the CSRF token in the POST request
             cy.request({
                 method: 'POST',
-                url: 'https://master.chargeautomation.com/register',
+                url: '/register',
                 headers: {
                     'content-type': 'application/json',
                     'x-csrf-token': csrfToken,  // Use the retrieved CSRF token here
                     'x-requested-with': 'XMLHttpRequest',
                     'x-xsrf-token': csrfToken  // Use the retrieved CSRF token here
                 },
-                referrer: 'https://master.chargeautomation.com/register',
+                referrer: '/register',
                 referrerPolicy: 'strict-origin-when-cross-origin',
                 body: {
                     "name": clientName,
@@ -160,7 +163,7 @@ export class Registration {
                 cy.wait(3000)
                 cy.get('#ifmail').then($iframe => {
                     const $body = $iframe.contents().find('body')
-                    cy.wrap($body).find('#mail [href*="https://master.chargeautomation.com/securelink/"]').should('contain.text', 'Verify Now').then($link => {
+                    cy.wrap($body).find('#mail [href*="/securelink/"]').should('contain.text', 'Verify Now').then($link => {
                         // Get the href attribute of the link
                         const href = $link.attr('href')
                         cy.log('Navigating to:', href)
@@ -182,38 +185,39 @@ export class Registration {
         cy.get('[title="Check Inbox @yopmail.com"]').should('be.visible').click({ force: true })
         cy.get('.wminbox').should('be.visible').wait(3000)
     }
-    verifyYopmailEmail(maxRetries = 15) {
-        let retryCount = 0
+    verifyYopmailEmail(clientEmail, maxAttempts, count = 1) {
+        if (count > maxAttempts) {
+            console.log('Max retries reached. No email is received for new user registration')
+            console.log('Trying to get the verification link from DB')
+            this.verifyEmailFromDb(clientEmail)
+            return
+        }
 
-        const findEmail = () => {
-            cy.getIframeBody('iframe[name="ifinbox"]').then(body => {
-                if (!body.text().includes('ChargeAutomation: Verify Your Email Address')) {  //not found
-                    if (retryCount < maxRetries) {
-                        cy.get('button#refresh').should('be.visible').click() // Refresh
-                        cy.wait(7000)
-                        cy.log('Retry Count: ' + retryCount)
-                        retryCount++
-                        findEmail()
-                    } else {
-                        throw new Error('Max retries reached. No email is received for new user registration')
-                    }
-                } else { //when we found it
-                    cy.getIframeBody('iframe[name="ifmail"]').then(body => {
-                        cy.wrap(body).find('a[href*=".chargeautomation.com/securelink/"]').should('be.visible').should('contain.text', 'Verify Now').then($link => {
-                            // Get the href attribute of the link
+        cy.log('Try Count: ' + count)
+        cy.getIframeBody('iframe[name="ifinbox"]').then(body => {
+            if (!body.text().includes('ChargeAutomation: Verify Your Email Address')) { // Email not found
+                cy.log('Email not found. Retrying...')
+                cy.get('button#refresh').should('be.visible').click() // Refresh
+                cy.wait(7000) // Wait before retrying
+                this.verifyYopmailEmail(clientEmail, maxAttempts, count + 1) // Retry
+            } else { // Email found
+                cy.getIframeBody('iframe[name="ifmail"]').then(mailBody => {
+                    cy.wrap(mailBody)
+                        .find('a[href*=".chargeautomation.com/securelink/"]')
+                        .should('be.visible')
+                        .and('contain.text', 'Verify Now')
+                        .then($link => {
                             const href = $link.attr('href')
                             cy.log('Navigating to:', href)
-                            cy.visit(href); // Verify link
+                            cy.visit(href) // Visit the verification link
                             cy.url().should('include', '/login')
                             cy.get('.alert').should('be.visible').and('contain.text', 'Verified Successfully')
                         })
-                    })
-                }
-            })
-        }
-
-        findEmail()
+                })
+            }
+        })
     }
+
     verifyEmailFromDb(clientEmail) {
         const query = `SELECT * FROM jobs WHERE payload LIKE '%Welcome To ChargeAutomation%' AND payload LIKE '%${clientEmail}%';`
         cy.task('queryDb', query).then(response => {
@@ -222,20 +226,19 @@ export class Registration {
                 throw new Error('No matching records found in the database.')
             }
 
-            cy.log(response);
+            cy.log(response)
             response.forEach(item => {
-                const payload = JSON.parse(item.payload);
-                const command = payload.data.command;
-                cy.log(command); // Add logging to inspect the command
+                const payload = JSON.parse(item.payload)
+                const command = payload.data.command
+                cy.log(command) // Add logging to inspect the command
 
-                // Decode the serialized command string
-                const commandRegex = "(https:\/\/master\.chargeautomation\.com\/securelink\/[a-zA-Z0-9]+)"
-                const match = command.match(commandRegex)
+                // Define a flexible regex to extract the dynamic link
+                const urlMatch = command.match(/https:\/\/[a-zA-Z0-9]+\.chargeautomation\.com\/securelink\/[a-zA-Z0-9]+/)
 
-                if (match && match.length > 0) {
-                    const dynamicLink = match[0].replace(/\\/g, '')
-                    cy.log(dynamicLink); // Add logging to inspect the dynamic link
-                    cy.visit(dynamicLink);
+                if (urlMatch && urlMatch.length > 0) {
+                    const dynamicLink = urlMatch[0]
+                    cy.log(dynamicLink) // Log the extracted dynamic link
+                    cy.visit(dynamicLink)
                     cy.url().should('include', '/login')
                     cy.get('.alert').should('be.visible').and('contain.text', 'Verified Successfully')
                 } else {
@@ -244,11 +247,75 @@ export class Registration {
             })
         })
     }
+    verifyEmailFromSMTP(clientEmail, maxAttempts = 10, count = 1) {
+        if (count > maxAttempts) {
+            cy.log('Max retries reached. No email is received for new user registration');
+            cy.log('Trying to get the verification link from the database');
+            this.verifyEmailFromDb(clientEmail);
+            return;
+        }
 
-    //Delete user account
+        const baseUrl = Cypress.config('baseUrl');
+        const smtpBaseUrl = baseUrl.replace('https://', 'https://smtp-');
+        cy.visit(`${smtpBaseUrl}?page=0&pageSize=100`, {
+            auth: {
+                username: 'admin',
+                password: 'ca##smtp',
+            }
+        });
+
+        cy.log(`Try Count: ${count}`);
+        cy.get('.MuiCardContent-root').should('not.contain.text', 'Inbox is empty'); // Inbox should not be empty
+
+        cy.get('body').then($body => {
+            const emailRowSelector = `[data-field="toAddress"]:contains(${clientEmail})`;
+
+            if ($body.find(emailRowSelector).length > 0) {
+                cy.log('Email found!');
+                cy.get(emailRowSelector)
+                    .contains(clientEmail)
+                    .parents('[role="row"]')
+                    .should('exist')
+                    .click();
+
+                // Email Content
+                cy.get('[id="content-tabpanel-html"]').contains('Welcome To ChargeAutomation').should('be.visible'); // Welcome message
+                cy.get('tr td [href*="chargeautomation.com/securelink/"]')
+                    .should('contain.text', 'Verify Now')
+                    .invoke('attr', 'href')
+                    .then(href => {
+                        cy.log(`Navigating to: ${href}`);
+                        cy.visit(href); // Visit the verification link
+                        cy.url().should('include', '/login');
+                        cy.get('.alert').should('be.visible').and('contain.text', 'Verified Successfully');
+                    });
+            } else {
+                cy.log('Email not found. Retrying...');
+                cy.reload();
+                cy.wait(2000); // Wait before retrying
+                this.verifyEmailFromSMTP(clientEmail, maxAttempts, count + 1); // Retry
+            }
+        });
+    }
+
     deleteUserAccount(accountId) {
-        cy.request('GET', 'https://master.chargeautomation.com/delete-account/' + accountId).then((response) => {
+
+        cy.task('queryDb', `DELETE FROM user_account_additional_infos WHERE user_account_id = ${accountId}`).then(response => {
+            expect([0, 1]).to.include(response.affectedRows) //effected rows are either 1 or 0
+        })
+        // Delete user account
+        cy.task('queryDb', `DELETE FROM user_accounts WHERE id = ${accountId}`).then(response => {
+            expect(response.affectedRows).to.equal(1) // Ensure one row was deleted
+        })
+
+        // Confirm deletion with a follow-up SELECT query
+        cy.task('queryDb', `SELECT * FROM user_accounts WHERE id = ${accountId}`).then((rows) => {
+            expect(rows.length).to.equal(0) // Ensure no rows are returned
+        })
+        /*
+        cy.request('GET', '/delete-account/' + accountId).then((response) => {
             expect(response.body).to.eq('Done')
         })
+        */
     }
 }

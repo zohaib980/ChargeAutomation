@@ -87,6 +87,7 @@ export class Dashboard {
   }
   saveProfileChanges() {
     cy.get('.mt-2 [class="btn btn-sm btn-success px-3"]').should('contain.text', 'Save Changes').click() //Save Changes
+    cy.verifyToast('Profile updated successfully')
   }
   checkCCCount(bookingID) {
     cy.get('[class="table-box-check"] div div span').contains(bookingID)

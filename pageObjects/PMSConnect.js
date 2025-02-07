@@ -19,11 +19,12 @@ export class PMSConnect {
         cy.get('.toast-text').should('contain.text', 'PMS Settings Updated')
         cy.get('.loading-label').should('not.exist') //loader should be disappear
         cy.get('[href="/client/v2/payment-rules"]').should('contain.text', 'Auto Payments').and('be.visible')
-        cy.get('.got-it-btn').click() // Got it button on toast 
+        cy.get('.loading-label').should('not.exist') //loader should be disappear
+        cy.get('.got-it-btn').should('be.visible').click() // Got it button on toast 
     }
     getAPIKey(){
         // First, make a GET request to the page to get the CSRF token
-       return cy.request('GET', 'https://master.chargeautomation.com/client/v2/payment-gateway-connect').then((response) => {
+       return cy.request('GET', '/client/v2/payment-gateway-connect').then((response) => {
 
             const html = response.body;
             const parser = new DOMParser();
@@ -35,11 +36,11 @@ export class PMSConnect {
             // Use the CSRF token in the POST request
            return cy.request({
                 method: 'POST',
-                url: 'https://master.chargeautomation.com/client/v2/api-generate-key',
+                url: '/client/v2/api-generate-key',
                 headers: {
                     'x-csrf-token': csrfToken,  // Use the retrieved CSRF token here 
                 },
-                referrer: 'https://master.chargeautomation.com/client/v2/api',
+                referrer: '/client/v2/api',
                 referrerPolicy: 'strict-origin-when-cross-origin',
                 body: {}
             }).then((response) => {
@@ -58,7 +59,7 @@ export class PMSConnect {
     endUserTrial(apiKey){
         cy.request({
             method: 'GET',
-            url: 'https://master.chargeautomation.com/api/end-user-subscription-trial',
+            url: '/api/end-user-subscription-trial',
             headers: {
                 'Authorization': 'Bearer ' + apiKey
             },

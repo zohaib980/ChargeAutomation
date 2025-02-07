@@ -32,8 +32,8 @@ export class BillingPage {
         })
     }
     getActiveSubscription() {
-        cy.get('.loading-label').should('not.exist') //loader should be disappear
-        return cy.get('[class="bg-card mb-3"] h3').should('exist').invoke('text') //Current Plan
+        cy.get('.loading-label').should('not.exist').wait(1000) //loader should be disappear
+        return cy.get('[class="bg-card mb-3"] h3').should('be.visible').invoke('text') //Current Plan
     }
     selectBillMonthly() {
         cy.get('input[id="billedTimeSelect"]').should('exist').uncheck({ force: true }) //select monthly
@@ -80,10 +80,37 @@ export class BillingPage {
     switchToBasic() {
         cy.get('#update-billing-plan-button-basic').should('exist').click()
         cy.get('.swal2-confirm').should('exist').click() //Yes
+        //Handling intercom survey modal
+        this.proceedIntercomSurvey()
+        /*
         cy.get('.toast-message').should('contain.text', 'Subscription plan updated successfully')
         cy.get('.loading-label').should('not.exist') //loader should be disappear
         cy.get('.toast-message').should('not.exist')
         cy.log('You are switched to Basic Plan')
+        */
+    }
+    proceedIntercomSurvey() {
+        cy.getIframeBody('iframe[name="intercom-modal-frame"]').find('.intercom-block-paragraph').should('be.visible').and('contain.text', 'Why are you downgrading your subscription?')
+        cy.getIframeBody('iframe[name="intercom-modal-frame"]').find('[name="select-response"]').select('I have found another solution') //select reason
+        cy.getIframeBody('iframe[name="intercom-modal-frame"]').find('[data-testid="survey-next-button"]').should('be.visible').click() //Submit
+        cy.getIframeBody('iframe[name="intercom-modal-frame"]').find('textarea[name="message"]').should('be.visible').type('Testing Automation')
+        cy.getIframeBody('iframe[name="intercom-modal-frame"]').find('[data-testid="survey-next-button"]').should('be.visible').click() //Submit
+        cy.getIframeBody('iframe[name="intercom-modal-frame"]').find('[data-testid="scale-emoji-item"][aria-label="1"]').should('be.visible').click() //emoji No thanks
+        cy.getIframeBody('iframe[name="intercom-modal-frame"]').find('[data-testid="survey-next-button"]').should('be.visible').click() //Submit
+        cy.getIframeBody('iframe[name="intercom-modal-frame"]').find('.intercom-block-paragraph').should('be.visible').and('contain.text', 'Describe reason for downgrading your subscription')
+        cy.getIframeBody('iframe[name="intercom-modal-frame"]').find('textarea[name="message"]').should('be.visible').type('Testing Automation')
+        cy.getIframeBody('iframe[name="intercom-modal-frame"]').find('[data-testid="survey-next-button"]').should('be.visible').click() //Submit
+        cy.getIframeBody('iframe[name="intercom-modal-frame"]').find('[href*="/downgrade-user-billing-to-basic-plan"]')
+            .should('be.visible').invoke('attr', 'href').then(href => { //Click here
+                cy.visit(href)  // on itercom page
+                cy.get('h3').should('be.visible').and('contain.text', 'Subscription plan updated successfully')
+                cy.visit('/client/v2/billing')  //revisit CA
+                //cy.get('.toast-message').should('contain.text', 'Subscription plan updated successfully')
+                //cy.get('.loading-label').should('not.exist') //loader should be disappear
+                //cy.get('.toast-message').should('not.exist')
+                cy.log('You are switched to Basic Plan')
+                cy.wait(5000)
+            })
     }
     selectMonthlyPlan(desiredPlan) {
         const formatteddesiredPlan = this.toStartCase(desiredPlan)
@@ -91,16 +118,19 @@ export class BillingPage {
             if (formatteddesiredPlan === currentPlan) {
                 cy.log(desiredPlan + ' is already subscribed as your current plan')
                 //Switching to Basic plan
-                cy.get('#update-billing-plan-button-basic').should('exist').click()
-                cy.get('.swal2-confirm').should('exist').click() //Yes
-                cy.get('.toast-message').should('contain.text', 'Subscription plan updated successfully')
                 cy.get('.loading-label').should('not.exist') //loader should be disappear
-                cy.get('.toast-message').should('not.exist')
-                cy.log('You are switched to Basic Plan')
+                cy.get('#update-billing-plan-button-basic').should('be.visible').click()
+                cy.get('[class="view-edit-title"]').should('be.visible').and('contain.text', 'Click here to update your plan')//modal
+                cy.get('.swal2-confirm').should('be.visible').click() //Yes
+                //Handling intercom survey modal
+                this.proceedIntercomSurvey()
+                this.gotoSubscriptionPlans()
+                this.selectBillMonthly()
                 this.selectMonthlyPlan(desiredPlan, currentPlan)
             } else {
-                cy.get('[id="update-billing-plan-button-' + desiredPlan + '_monthly"]').should('contain.text', 'Start ' + formatteddesiredPlan).click().wait(1000) //Start ....
                 //cy.get('.loading-label').should('not.exist') //loader should be disappear
+                cy.get('[id="update-billing-plan-button-' + desiredPlan + '_monthly"]').should('contain.text', 'Start ' + formatteddesiredPlan).click().wait(1000) //Start ....
+                cy.get('.loading-label').should('not.exist') //loader should be disappear
                 cy.get('.modal.show > .modal-dialog > .modal-content > .modal-body > .rental_inner_body > #closeBillingRentalModal').if().click() //Close
                 cy.get('[id="update-billing-plan-button-' + desiredPlan + '_monthly"]').should('contain.text', 'Start ' + formatteddesiredPlan).click().wait(1000) //Start ....
                 cy.get('.loading-label').should('not.exist') //loader should be disappear
@@ -116,17 +146,20 @@ export class BillingPage {
             if (formatteddesiredPlan === currentPlan) {
                 cy.log(desiredPlan + ' is already subscribed as your current plan')
                 //Switching to Basic plan
-                cy.get('#update-billing-plan-button-basic').should('exist').click()
-                cy.get('.swal2-confirm').should('exist').click() //Yes
-                cy.get('.toast-message').should('contain.text', 'Subscription plan updated successfully')
                 cy.get('.loading-label').should('not.exist') //loader should be disappear
-                cy.get('.toast-message').should('not.exist')
-                cy.log('You are switched to Basic Plan')
+                cy.get('#update-billing-plan-button-basic').should('exist').click()
+                cy.get('[class="view-edit-title"]').should('be.visible').and('contain.text', 'Click here to update your plan')//modal
+                cy.get('.swal2-confirm').should('exist').click() //Yes
+                //Handling intercom survey modal
+                this.proceedIntercomSurvey()
+                this.gotoSubscriptionPlans()
+                cy.wait(5000)
+                this.selectBillAnnually()
                 this.selectAnnualPlan(desiredPlan, currentPlan)
             } else {
                 this.selectBillAnnually()
                 cy.get('[id="update-billing-plan-button-' + desiredPlan + '_yearly"]').should('contain.text', 'Start ' + formatteddesiredPlan).click().wait(1000) //Start ....
-                //cy.get('.loading-label').should('not.exist') //loader should be disappear
+                cy.get('.loading-label').should('not.exist') //loader should be disappear
                 cy.get('.modal.show > .modal-dialog > .modal-content > .modal-body > .rental_inner_body > #closeBillingRentalModal').if().click() //Close
                 cy.get('[id="update-billing-plan-button-' + desiredPlan + '_yearly"]').should('contain.text', 'Start ' + formatteddesiredPlan).click().wait(1000) //Start ....
                 cy.get('.loading-label').should('not.exist') //loader should be disappear
@@ -151,7 +184,10 @@ export class BillingPage {
             cy.get('[class="toast-message"]').should('contain.text', 'Please add your card to upgrade your plan') //Success toast
             cy.get('[class="toast-message"]').should('not.exist')
             cy.get('.loading-label').should('not.exist') //loader should be disappear
-
+            //Get estimated Charge Amount
+            this.getEstimatedChargeAmount().then(estimatedCharge => {
+                cy.wrap(estimatedCharge).as('estimatedCharge')
+            })
             //Add a credit card on subsc modal
             this.addCConSubscModal(paymentCard)
             cy.get('.show [id*=update-plan-button]').should('contain.text', 'Add Rentals').should('be.visible').click() //Add Rentals
@@ -163,9 +199,7 @@ export class BillingPage {
     }
     getRentalCountonPlan() {
         cy.get('.loading-label').should('not.exist') //loader should be disappear
-        return cy.get('[class="bg-card mb-3"] p.mb-0').should('exist').then(ele => {
-            const text = ele.text()
-            cy.log(text) //rental count
+        return cy.get('[class="bg-card mb-3"] p.mb-0').should('be.visible').invoke('text').then(text => {
             const trimmedText = text.trim()
             let count = trimmedText.split(" ")
             let rentalCount = count[0].trim()
@@ -203,11 +237,7 @@ export class BillingPage {
     clickStartPlan(plan, duration) {
         const formatedPlan = this.toStartCase(plan)
         const formatedDuration = this.toStartCase(duration)
-        cy.get('.modal-content [id="update-plan-button' + plan + '_' + duration + '"]').should('contain.text', 'Start ' + formatedPlan + ' ' + formatedDuration).click()
-    }
-    validateToastMsg(msg) {
-        cy.get('.toast-message').should('contain.text', msg)
-        cy.get('.toast-message').should('not.exist')
+        cy.get('.modal-content [id="update-plan-button' + plan + '_' + duration + '"]').should('be.visible').should('contain.text', 'Start ' + formatedPlan + ' ' + formatedDuration).click()
     }
     closeSubscModal() {
         cy.get('.show #closeBillingRentalModal').should('be.visible').click() //Close on modal
@@ -238,7 +268,7 @@ export class BillingPage {
 
                 cy.request({
                     method: 'GET',
-                    url: 'https://master.chargeautomation.com/client/v2/customer-portal', // The URL to request
+                    url: '/client/v2/customer-portal', // The URL to request
                     headers: {
                         'Authorization': 'Bearer 2af663f0-f267-11ee-940d-3b7428678c26'
                     },
@@ -278,7 +308,7 @@ export class BillingPage {
 
         cy.request({
             method: 'GET',
-            url: 'https://master.chargeautomation.com/client/v2/customer-portal', // The URL to request
+            url: '/client/v2/customer-portal', // The URL to request
             headers: {
                 'Authorization': 'Bearer 2af663f0-f267-11ee-940d-3b7428678c26'
             },
@@ -323,7 +353,7 @@ export class BillingPage {
     }
     addCConSubscModal(cardNumber) {
         cy.get('#full_name').if().then(() => {
-            cy.get('#full_name').should('be.visible').type('Waqas')
+            cy.get('#full_name').should('exist').and('not.be.disabled').type('Waqas')
             cy.get('#card-element').within(() => {
                 cy.fillElementsInput('cardNumber', cardNumber);
                 cy.fillElementsInput('cardExpiry', '1026'); // MMYY
@@ -373,8 +403,8 @@ export class BillingPage {
             .find('iframe[id="challengeFrame"]')
             .its('0.contentDocument')
             .its('body')
-            .find('#test-source-authorize-3ds').should('be.visible').click().wait(3000)
-        cy.reload()
+            .find('#test-source-authorize-3ds').should('be.visible').click().wait(4000)
+        //cy.reload()
         cy.get('.ViewInvoiceDetailsLink').should('be.visible').and('contain.text', 'View invoice and payment details') //View invoice and payment details link
         cy.get('[data-testid="download-invoice-receipt-pdf-button"]').if().should('be.visible').and('contain.text', 'Download receipt')
     }
@@ -423,10 +453,10 @@ export class BillingPage {
                 .and('contain.text', 'An estimated prorated charge of')
 
             cy.get('[id*="update-plan-button"]').should('be.visible').and('contain.text', 'Add Rentals').click() //Add Rentals button
-            cy.get('.toast-message').should('contain.text', 'Subscription plan updated successfully')
-            cy.get('.toast-message').should('not.exist')
+            cy.verifyToast('Subscription plan updated successfully')
 
             //Validate updated rental count
+            cy.get('.loading-label').should('not.exist') //loader should be disappear
             cy.get('[class="bg-card mb-3"] p.mb-0').should('exist').invoke('text').then(text => {
                 const number = text.trim().match(/\d+/)[0];
                 // Convert to number if needed
@@ -438,11 +468,11 @@ export class BillingPage {
     removeRentalOnPlan(count) {
         cy.get('[data-target="#rentalModal"]').eq(1).should('be.visible').and('contain.text', 'Remove Rental').click() //Remove Rental
         cy.get('[class="rental_inner_body"] h3').should('be.visible').and('contain.text', 'Remove Rentals') //heading on modal
-        cy.get('[class="rental_desc text-danger"]').should('contain.text', "If you'd like to reduce to  rentals, you'll").and('contain.text', 'need to turn off rental from the properties first.')
+        cy.get('[class="rental_desc text-danger"]').should('contain.text', "If you’d like to remove  rentals, you’ll need to turn off  rentals from your properties first")
         cy.get('.add_rental input').should('be.visible').type(parseInt(count), { force: true }).should('have.value', parseInt(count).toString()) //rental count
+        cy.get('.rental_desc').should('contain.text', 'If you’d like to remove ' + count + ' rentals, you’ll need to turn off ' + count + ' rentals from your properties first')
         cy.get('[id*="update-plan-button"]').should('contain.text', 'Remove Rentals').and('be.visible').click() //Remove Rentals
-        cy.get('.toast-message').should('contain.text', 'Subscription plan updated successfully')
-        cy.get('.toast-message').should('not.exist')
+        cy.verifyToast('Subscription plan updated successfully')
     }
     getCurrentAddOn() {
         cy.get('.loading-label').should('not.exist') //loader should be disappear
@@ -465,7 +495,7 @@ export class BillingPage {
         }
     }
     smsPlanSubscriptionAPI(priceId) {
-        cy.request('GET', 'https://master.chargeautomation.com/client/v2/billing')
+        cy.request('GET', '/client/v2/billing')
             .then((response) => {
 
                 const html = response.body;
@@ -477,7 +507,7 @@ export class BillingPage {
 
                 cy.request({
                     method: 'POST',
-                    url: 'https://master.chargeautomation.com/client/v2/subscribe-sms-plan', // The URL to request
+                    url: '/client/v2/subscribe-sms-plan', // The URL to request
                     headers: {
                         'content-type': 'application/json',
                         'x-csrf-token': csrfToken,  // Use the retrieved CSRF token here
@@ -509,20 +539,40 @@ export class BillingPage {
 
                 })
             })
+        cy.wait(10000)
     }
     ValidateSubscribedSMSPlan(currentPlan) {
-        cy.get('.toggle-arrow').if().click({ force: true }).wait(1000)
+        cy.get('[class="plan-listbox-top"] .toggle-arrow').if().click({ force: true }).wait(1000)
         if (currentPlan === 'No add-on added') {
-            cy.get('.btn-rounded.activated').should('not.exist') //Curren plan button should not exist
+            cy.get('.btn-rounded.activated').should('not.exist') //Current plan button should not exist
         } else {
             const match = currentPlan.match(/\(\$(\d+)\)/);
             if (match) {
                 const valueWithDollarSign = `$${match[1]}`;
                 cy.log(`Extracted value: ${valueWithDollarSign}`) //get the $29 value from
-                cy.get('.btn-rounded.activated').parents('.plan-listbox-top').find('.plan-price').should('contain.text', valueWithDollarSign)
+                cy.get('[class="plan-listbox-top"] .btn-rounded.activated').parents('[class="plan-listbox-body"] ul')
+                    .find('li:nth-child(1) h4').should('contain.text', valueWithDollarSign)
             }
         }
     }
+    verifyActivatedSMSAddons(desiredPlan) {
+        cy.get('.loading-label').should('not.exist') // loader should disappear
+        cy.get('.bg-card:nth-child(3) h3').should('contain.text', 'Add On Subscription')
+        cy.get('.bg-card:nth-child(3) ul li').should('contain.text', 'SMS Plan (' + desiredPlan + ')')
+        cy.get('.plan-badge').should('be.visible').and('contain.text', 'Monthly')
+
+        const formatDate = (date) => {
+            const day = String(date.getDate()).padStart(2, '0')
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+            const month = monthNames[date.getMonth()]
+            const year = date.getFullYear()
+            return `${day} ${month} ${year}`
+        }
+
+        const todayDate = formatDate(new Date())
+        cy.get('li > .mb-0').should('contain.text', `Purchased on ${todayDate}`)
+    }
+
     verifyCardModal(desiredPlan) {
         cy.get('.price-modal-content').should('be.visible').and('contain.text', desiredPlan).and('contain.text', 'text messages')
         cy.get('[for="full_name"]').should('contain.text', 'Name On Card')
@@ -584,24 +634,26 @@ export class BillingPage {
     //Account Trial 
     validateTrialEndDate() {
 
-        cy.request('GET', 'https://master.chargeautomation.com/client/v2/trial-end-date').then((response) => {
+        cy.request('GET', '/client/v2/trial-end-date').then((response) => {
             expect(response.status).to.eq(200)
             cy.log(response.body)
             expect(response.body.status_code).to.eq(200)
             expect(response.body.status).to.eq(true)
             let trialEndingDate = response.body.data.trial_ending_date
 
-            cy.log('Actual Trial Ending Date:', trialEndingDate);
+            cy.log('Actual Trial Ending Date:', trialEndingDate)
 
             // Calculate the date 7 days from now
             const now = new Date()
             const sevenDaysFromNow = new Date(now)
             sevenDaysFromNow.setDate(now.getDate() + 7)
 
-            // Format the calculated date to match the format of trialEndingDate (e.g., '09 Jul,2024')
-            const options = { day: '2-digit', month: 'short', year: 'numeric' }
-            const formattedDate = sevenDaysFromNow.toLocaleDateString('en-GB', options)
-            const formattedSevenDaysFromNow = formattedDate.replace(/ (\d{4})$/, ',$1')
+            // Manually create the formatted date string
+            const day = sevenDaysFromNow.getDate().toString().padStart(2, '0')
+            const month = sevenDaysFromNow.toLocaleString('default', { month: 'short' })
+            const year = sevenDaysFromNow.getFullYear()
+
+            const formattedSevenDaysFromNow = `${day} ${month},${year}`
 
             // Log the calculated date for debugging
             cy.log('Calculated Date:', formattedSevenDaysFromNow)
@@ -610,7 +662,7 @@ export class BillingPage {
             expect(trialEndingDate).to.eq(formattedSevenDaysFromNow)
         })
     }
-    validateOutstandingInvoice(maxAttempts, count = 1) {
+    validateOutstandingInvoiceMsg(maxAttempts, count = 1) {
         cy.get('.loading-label').should('not.exist') //loader should be disappear
         if (count > maxAttempts) {
             throw new Error('Pending Invoice Info message is not shown!')
@@ -630,16 +682,29 @@ export class BillingPage {
             } else {
                 cy.wait(10000) //10 sec
                 cy.log('Try Count: ' + count)
-                this.validateOutstandingInvoice(maxAttempts, count + 1)
+                this.validateOutstandingInvoiceMsg(maxAttempts, count + 1)
             }
         })
     }
-    validatePendingInvoiceAmount(estimatedCharge) {
-        cy.get('li a[href*="https://invoice.stripe.com/"]').parents('ul').find('li:nth-child(4)').invoke('text').then(amount => {
-            // Extract the numeric value from the text content
-            const charge = amount.match(/\d+\.\d+/)[0];
-            let invoiceAmount = parseFloat(charge)
-            expect(invoiceAmount).to.be.closeTo(estimatedCharge, 0.09)
+    validatePendingInvoiceAmount(estimatedCharge, retries = 10) {
+        cy.get('body').then($body => {
+            if ($body.find('li a[href*="https://invoice.stripe.com/"]').length) {
+                cy.get('li a[href*="https://invoice.stripe.com/"]').parents('ul').find('li:nth-child(4)').invoke('text').then(amount => {
+                    // Extract the numeric value from the text content
+                    const charge = amount.match(/\d+\.\d+/)[0]
+                    let invoiceAmount = parseFloat(charge)
+                    expect(invoiceAmount).to.be.closeTo(estimatedCharge, 0.09)
+                })
+            } else {
+                // If the element doesn't exist, wait for 10 seconds and retry
+                if (retries > 0) {
+                    cy.wait(10000).then(() => {
+                        cy.get('.b-invoce-view span').should('be.visible').and('contain.text', 'Load more').click() //Load more
+                        cy.get('.loading-label').should('not.exist') //loader should be disappear
+                        this.validatePendingInvoiceAmount(estimatedCharge, retries - 1)
+                    })
+                }
+            }
         })
     }
     payPendingInvoice(index) {

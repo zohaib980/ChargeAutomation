@@ -16,7 +16,7 @@ export class TemplateMessages {
         cy.get('[aria-expanded="false"] [class="booking-accordion-title collapsed d-xs-block"]').if().click() //expand
         cy.get('[class="form-control form-control-sm custom-select-arrow"]').eq(1).select(duration).wait(500) //Email immediately
         cy.get('#p-English tbody td:nth-last-of-type(2) [class="form-control form-control-sm custom-select-arrow"]').select(whenToApply) // Before checkin
-        cy.get('#p-English [class="accordion-footer mt-3"] .btn-success').should('contain.text', 'Save Email Changes').click() //Save Email Changes
-        cy.get('.toast-message').should('contain.text', 'Updated Successfully!')
+        cy.get('#p-English [class="accordion-footer mt-3"] .btn-success').should('contain.text', 'Save').click() //Save Email Changes
+        cy.verifyToast('Updated Successfully!')
     }
 }
