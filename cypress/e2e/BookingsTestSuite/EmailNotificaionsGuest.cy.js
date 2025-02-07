@@ -3,9 +3,6 @@
 import { LoginPage } from "../../../pageObjects/LoginPage"
 import { OnlineCheckinSettings } from "../../../pageObjects/OnlineCheckinSettings"
 import { BookingPage } from "../../../pageObjects/BookingPage"
-import { Dashboard } from "../../../pageObjects/Dashboard"
-import { PreCheckIn } from "../../../pageObjects/PreCheckIn"
-import { GuidebookPage } from "../../../pageObjects/GuidbookPage"
 import { TemplateMessages } from "../../../pageObjects/TemplateMessages"
 import { AutoPayments } from "../../../pageObjects/AutoPayments"
 import { ReuseableCode } from "../../support/ReuseableCode"
@@ -14,9 +11,6 @@ import { BookingDetailPage } from "../../../pageObjects/BookingDetailPage"
 const loginPage = new LoginPage
 const onlineCheckinSettings = new OnlineCheckinSettings
 const bookingPage = new BookingPage
-const dashboard = new Dashboard
-const preCheckIn = new PreCheckIn
-const guidebookPage = new GuidebookPage
 const templateMessages = new TemplateMessages
 const autoPayments = new AutoPayments
 const reuseableCode = new ReuseableCode
@@ -31,7 +25,6 @@ describe('Guest Email Notifications', function () {
     let propertyName = 'QA Test Property'
 
     beforeEach(() => {
-        cy.visit('/')
         loginPage.happyLogin(loginEmail, loginPassword) //Login to portal
     })
 

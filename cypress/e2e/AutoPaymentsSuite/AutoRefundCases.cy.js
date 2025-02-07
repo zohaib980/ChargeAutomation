@@ -12,14 +12,13 @@ const reuseableCode = new ReuseableCode
 
 describe('Autopayment (Reservation Auto Refund cases) Settings Functionalities', () => {
 
-    const loginEmail = Cypress.config('users').user1.username
-    const loginPassword = Cypress.config('users').user1.password
+    const loginEmail = Cypress.config('users').user2.username
+    const loginPassword = Cypress.config('users').user2.password
 
     let bSource = 'Direct'
     let propertyName = 'QA Test Property'
 
     beforeEach(() => {
-        cy.visit('/')
         loginPage.happyLogin(loginEmail, loginPassword)
     })
     it('CA_AP_25 - Validate Reservation Auto Refund functionality on a booking source using Anytime after booking', () => {
@@ -35,7 +34,7 @@ describe('Autopayment (Reservation Auto Refund cases) Settings Functionalities',
         let amountTypePaymentSelect = '100' //100%
         let reservation_authTime = '0' //Collect When: Immediately
         let reservation_chargeOption = '1' //when to charge: after booking 1
-        autoPayments.enableReservationPayment(bSource,amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
+        autoPayments.enableReservationPayment(bSource, amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
         autoPayments.clickEditBS(bSource) //Edit BS
         //Enable Security Deposit
         let sd_amountType = '1' //How much to authorize? Fixed amount
@@ -46,7 +45,7 @@ describe('Autopayment (Reservation Auto Refund cases) Settings Functionalities',
         autoPayments.clickEditBS(bSource) //Edit BS
         let toggleStatus = 1  // 1st toggle OR 2nd Toggle 
         let refundTime = '0' //anytime After booking 0
-        autoPayments.enableAutoRefund(bSource, toggleStatus, refundTime) 
+        autoPayments.enableAutoRefund(bSource, toggleStatus, refundTime)
         //Enable a Booking Source
         autoPayments.enableBookingSource(bSource)
 
@@ -64,7 +63,8 @@ describe('Autopayment (Reservation Auto Refund cases) Settings Functionalities',
         bookingPage.valiateTrxAmount('Reservation Charge', '100')
         bookingPage.valiateTrxAmount('Security Deposit', '200')
         //Add a Credit Card on new booking
-        bookingPage.addCCOnNewBooking()
+        bookingPage.addCCOnNewBooking('4242424242424242')
+        cy.verifyToast('Card added successfully')
         bookingPage.validateStatus('Reservation Charge', 'Paid')
         bookingPage.validateStatus('Security Deposit', 'Scheduled')
         //Cancel the booking
@@ -87,7 +87,7 @@ describe('Autopayment (Reservation Auto Refund cases) Settings Functionalities',
         bookingPage.validateStatus('Refund', 'Overdue', 'Refunded')
     })
     it('CA_AP_26 - Validate Reservation Auto Refund functionality on a booking source using Anytime before checkin', () => {
-        
+
         autoPayments.gotoAutopayments()
         autoPayments.validateWarningPopup() //Warning popup
         //Disable CC Validation
@@ -99,7 +99,7 @@ describe('Autopayment (Reservation Auto Refund cases) Settings Functionalities',
         let amountTypePaymentSelect = '100' //100%
         let reservation_authTime = '0' //Collect When: Immediately
         let reservation_chargeOption = '1' //when to charge: after booking 1
-        autoPayments.enableReservationPayment(bSource,amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
+        autoPayments.enableReservationPayment(bSource, amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
         autoPayments.clickEditBS(bSource) //Edit BS
         //Enable Security Deposit
         let sd_amountType = '1' //How much to authorize? Fixed amount
@@ -110,7 +110,7 @@ describe('Autopayment (Reservation Auto Refund cases) Settings Functionalities',
         autoPayments.clickEditBS(bSource) //Edit BS
         let toggleStatus = 2  // 1st toggle OR 2nd Toggle 
         let refundTime = '0' //anytime After booking 0
-        autoPayments.enableAutoRefund(bSource, toggleStatus, refundTime) 
+        autoPayments.enableAutoRefund(bSource, toggleStatus, refundTime)
         //Enable a Booking Source
         autoPayments.enableBookingSource(bSource)
 
@@ -130,7 +130,8 @@ describe('Autopayment (Reservation Auto Refund cases) Settings Functionalities',
         bookingPage.valiateTrxAmount('Reservation Charge', '100')
         bookingPage.valiateTrxAmount('Security Deposit', '200')
         //Add a Credit Card on new booking
-        bookingPage.addCCOnNewBooking()
+        bookingPage.addCCOnNewBooking('4242424242424242')
+        cy.verifyToast('Card added successfully')
         bookingPage.validateStatus('Reservation Charge', 'Paid')
         bookingPage.validateStatus('Security Deposit', 'Scheduled')
         //Cancel the booking
@@ -165,7 +166,7 @@ describe('Autopayment (Reservation Auto Refund cases) Settings Functionalities',
         let amountTypePaymentSelect = '100' //100%
         let reservation_authTime = '0' //Collect When: Immediately
         let reservation_chargeOption = '1' //when to charge: after booking 1
-        autoPayments.enableReservationPayment(bSource,amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
+        autoPayments.enableReservationPayment(bSource, amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
         autoPayments.clickEditBS(bSource) //Edit BS
         //Enable Security Deposit
         let sd_amountType = '1' //How much to authorize? Fixed amount
@@ -199,12 +200,13 @@ describe('Autopayment (Reservation Auto Refund cases) Settings Functionalities',
         bookingPage.valiateTrxAmount('Reservation Charge', '100')
         bookingPage.valiateTrxAmount('Security Deposit', '200')
         //Add a Credit Card on new booking
-        bookingPage.addCCOnNewBooking()
+        bookingPage.addCCOnNewBooking('4242424242424242')
+        cy.verifyToast('Card added successfully')
         bookingPage.validateStatus('Reservation Charge', 'Paid')
         bookingPage.validateStatus('Security Deposit', 'Scheduled')
         //Cancel the booking
         bookingPage.changeBookingStatus('0')  //Cancelled
-        
+
         cy.log('After booking cancellation A full refund entry is created against Reservation Charge with status approval required (as we are canceling the booking within 2 hours)')
         bookingPage.expandBooking(0) //expand first booking
         //Validate status
@@ -235,7 +237,7 @@ describe('Autopayment (Reservation Auto Refund cases) Settings Functionalities',
         let amountTypePaymentSelect = '100' //100%
         let reservation_authTime = '0' //Collect When: Immediately
         let reservation_chargeOption = '1' //when to charge: after booking 1
-        autoPayments.enableReservationPayment(bSource,amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
+        autoPayments.enableReservationPayment(bSource, amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
         autoPayments.clickEditBS(bSource) //Edit BS
         //Enable Security Deposit
         let sd_amountType = '1' //How much to authorize? Fixed amount
@@ -269,12 +271,13 @@ describe('Autopayment (Reservation Auto Refund cases) Settings Functionalities',
         bookingPage.valiateTrxAmount('Reservation Charge', '100')
         bookingPage.valiateTrxAmount('Security Deposit', '200')
         //Add a Credit Card on new booking
-        bookingPage.addCCOnNewBooking()
+        bookingPage.addCCOnNewBooking('4242424242424242')
+        cy.verifyToast('Card added successfully')
         bookingPage.validateStatus('Reservation Charge', 'Paid')
         bookingPage.validateStatus('Security Deposit', 'Scheduled')
         //Cancel the booking
         bookingPage.changeBookingStatus('0')  //Cancelled
-        
+
         cy.log('On booking cancellation A refund entry is created after deducting charges as per applied settings')
         bookingPage.expandBooking(0) //expand first booking
         //Validate status
@@ -305,7 +308,7 @@ describe('Autopayment (Reservation Auto Refund cases) Settings Functionalities',
         let amountTypePaymentSelect = '100' //100%
         let reservation_authTime = '0' //Collect When: Immediately
         let reservation_chargeOption = '1' //when to charge: after booking 1
-        autoPayments.enableReservationPayment(bSource,amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
+        autoPayments.enableReservationPayment(bSource, amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
         autoPayments.clickEditBS(bSource) //Edit BS
         //Enable Security Deposit
         let sd_amountType = '1' //How much to authorize? Fixed amount
@@ -339,12 +342,13 @@ describe('Autopayment (Reservation Auto Refund cases) Settings Functionalities',
         bookingPage.valiateTrxAmount('Reservation Charge', '100')
         bookingPage.valiateTrxAmount('Security Deposit', '200')
         //Add a Credit Card on new booking
-        bookingPage.addCCOnNewBooking()
+        bookingPage.addCCOnNewBooking('4242424242424242')
+        cy.verifyToast('Card added successfully')
         bookingPage.validateStatus('Reservation Charge', 'Paid')
         bookingPage.validateStatus('Security Deposit', 'Scheduled')
         //Cancel the booking
         bookingPage.changeBookingStatus('0')  //Cancelled
-        
+
         cy.log('On booking cancellation refund entry is created after deducting charges as per applied settings')
         bookingPage.expandBooking(0) //expand first booking
         //Validate status
@@ -374,7 +378,7 @@ describe('Autopayment (Reservation Auto Refund cases) Settings Functionalities',
         let cancelWithin = '432000' //if cancelled within > 5 Days
         let flatfee = '5' //Flat fee
         autoPayments.enableAutoRefund(bSource, toggleStatus, refundTime, cancelfee, cancelWithin, flatfee)
-        
+
         //Add cancellation Fee option
         autoPayments.clickEditBS(bSource) //Edit BS
         // addCancellationOption(index, bSource, cancelfee, cancelWithin, flatfee)
@@ -390,5 +394,4 @@ describe('Autopayment (Reservation Auto Refund cases) Settings Functionalities',
         //Enable a Booking Source
         autoPayments.enableBookingSource(bSource)
     })
-
 })

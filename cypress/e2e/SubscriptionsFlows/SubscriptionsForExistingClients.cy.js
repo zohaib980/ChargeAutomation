@@ -18,7 +18,6 @@ describe('Subscription Flows for Existing_Clients', { retries: 0 }, () => {
     const loginPassword = Cypress.config('users').user2.password
 
     beforeEach(() => {
-        cy.visit('/')
         loginPage.happyLogin(loginEmail, loginPassword)
     })
 
@@ -61,7 +60,7 @@ describe('Subscription Flows for Existing_Clients', { retries: 0 }, () => {
         })
         //Click Start Plan
         billingPage.clickStartPlan('essentials', 'monthly')
-        billingPage.validateToastMsg('Subscription plan updated successfully')
+        cy.verifyToast('Subscription plan updated successfully')
         //Validate applied plan
         billingPage.validateAppliedPlan('essentials')
         //Go to Billing Detail
@@ -111,7 +110,7 @@ describe('Subscription Flows for Existing_Clients', { retries: 0 }, () => {
         })
         //Click Start Plan
         billingPage.clickStartPlan('professional', 'monthly')
-        billingPage.validateToastMsg('Subscription plan updated successfully')
+        cy.verifyToast('Subscription plan updated successfully')
         //Validate applied plan on Subscription Plan tab
         billingPage.validateAppliedPlan('professional')
         //Go to Billing Detail
@@ -161,7 +160,7 @@ describe('Subscription Flows for Existing_Clients', { retries: 0 }, () => {
         })
         //Click Start Plan
         billingPage.clickStartPlan('essentials', 'yearly')
-        billingPage.validateToastMsg('Subscription plan updated successfully')
+        cy.verifyToast('Subscription plan updated successfully')
         //Validate applied plan
         billingPage.validateAppliedPlan('essentials')
         //Go to Billing Detail
@@ -211,7 +210,7 @@ describe('Subscription Flows for Existing_Clients', { retries: 0 }, () => {
         })
         //Click Start Plan
         billingPage.clickStartPlan('professional', 'yearly')
-        billingPage.validateToastMsg('Subscription plan updated successfully')
+        cy.verifyToast('Subscription plan updated successfully')
         //Validate applied plan
         billingPage.validateAppliedPlan('professional')
         //Go to Billing Detail
@@ -242,8 +241,6 @@ describe('Subscription Flows for Existing_Clients', { retries: 0 }, () => {
                 })
             }
         })
-
-
     })
     it('CA_SUB_06 - Validate update subscription for existing client when the charge is unsuccessful for monthly Essentials subscription', () => {
         //Go to billing page
@@ -284,7 +281,7 @@ describe('Subscription Flows for Existing_Clients', { retries: 0 }, () => {
         billingPage.addCConSubscModal('4000000000000002') //non-3Ds declined card
         //Click Start Plan
         billingPage.clickStartPlan('essentials', 'monthly')
-        billingPage.validateToastMsg('Your card was declined')
+        cy.verifyToast('Your card was declined')
         billingPage.closeSubscModal()
         //Go to Billing Detail
         billingPage.gotoBillingDetail()
@@ -333,7 +330,7 @@ describe('Subscription Flows for Existing_Clients', { retries: 0 }, () => {
         billingPage.addCConSubscModal('4000000000000002') //non-3Ds declined card
         //Click Start Plan
         billingPage.clickStartPlan('professional', 'monthly')
-        billingPage.validateToastMsg('Your card was declined')
+        cy.verifyToast('Your card was declined')
         billingPage.closeSubscModal()
         //Go to Billing Detail
         billingPage.gotoBillingDetail()
@@ -382,7 +379,7 @@ describe('Subscription Flows for Existing_Clients', { retries: 0 }, () => {
         billingPage.addCConSubscModal('4000000000000002') //non-3DS declined card
         //Click Start Plan
         billingPage.clickStartPlan('essentials', 'yearly')
-        billingPage.validateToastMsg('Your card was declined')
+        cy.verifyToast('Your card was declined')
         billingPage.closeSubscModal()
         //Go to Billing Detail
         billingPage.gotoBillingDetail()
@@ -431,7 +428,7 @@ describe('Subscription Flows for Existing_Clients', { retries: 0 }, () => {
         billingPage.addCConSubscModal('4000000000000002') //non-3DS declined card
         //Click Start Plan
         billingPage.clickStartPlan('professional', 'yearly')
-        billingPage.validateToastMsg('Your card was declined')
+        cy.verifyToast('Your card was declined')
         billingPage.closeSubscModal()
         //Go to Billing Detail
         billingPage.gotoBillingDetail()
@@ -480,7 +477,7 @@ describe('Subscription Flows for Existing_Clients', { retries: 0 }, () => {
         billingPage.addCConSubscModal('5555555555554444') //non-3DS valid card
         //Click Start Plan
         billingPage.clickStartPlan('essentials', 'monthly')
-        billingPage.validateToastMsg('Subscription plan updated successfully')
+        cy.verifyToast('Subscription plan updated successfully')
         //Go to Billing Detail
         billingPage.gotoBillingDetail()
         //validate Activated subscription
@@ -530,7 +527,7 @@ describe('Subscription Flows for Existing_Clients', { retries: 0 }, () => {
         billingPage.addCConSubscModal('4000000000003055') //3DS1 valid card
         //Click Start Plan
         billingPage.clickStartPlan('professional', 'monthly')
-        billingPage.validateToastMsg('Subscription plan updated successfully')
+        cy.verifyToast('Subscription plan updated successfully')
         //Go to Billing Detail
         billingPage.gotoBillingDetail()
         //validate Activated subscription
@@ -582,13 +579,13 @@ describe('Subscription Flows for Existing_Clients', { retries: 0 }, () => {
         billingPage.clickStartPlan('essentials', 'yearly')
         cy.get('.toast-message').then(($el) => {
             if ($el.text().includes('Please approve pending transactions.')) {
-                billingPage.validateToastMsg('Please approve pending transactions.')
+                cy.verifyToast('Please approve pending transactions.')
                 // Approve 3DS
                 billingPage.approve3DS();
             }
         })
 
-        billingPage.validateToastMsg('Subscription plan updated successfully')
+        cy.verifyToast('Subscription plan updated successfully')
         //Go to Billing Detail
         billingPage.gotoBillingDetail()
         //validate Activated subscription
@@ -640,13 +637,13 @@ describe('Subscription Flows for Existing_Clients', { retries: 0 }, () => {
         billingPage.clickStartPlan('essentials', 'yearly')
         cy.get('.toast-message').then(($el) => {
             if ($el.text().includes('Please approve pending transactions.')) { //if payment goes in 3ds verification we fail it
-                billingPage.validateToastMsg('Please approve pending transactions.')
+                cy.verifyToast('Please approve pending transactions.')
                 //Fail3DS
                 billingPage.fail3DS()
-                billingPage.validateToastMsg('We are unable to authenticate your payment method. Please choose a different payment method and try again')
+                cy.verifyToast('We are unable to authenticate your payment method. Please choose a different payment method and try again')
                 billingPage.closeSubscModal()
             } else {
-                billingPage.validateToastMsg('Subscription plan updated successfully')  //else payment will be processed without 3DS
+                cy.verifyToast('Subscription plan updated successfully')  //else payment will be processed without 3DS
             }
         })
 
@@ -696,7 +693,7 @@ describe('Subscription Flows for Existing_Clients', { retries: 0 }, () => {
         })
         //Click Start Plan
         billingPage.clickStartPlan('essentials', 'monthly')
-        billingPage.validateToastMsg('Subscription plan updated successfully')
+        cy.verifyToast('Subscription plan updated successfully')
         //Validate applied plan
         billingPage.validateAppliedPlan('essentials')
         //Go to Billing Detail
@@ -752,7 +749,7 @@ describe('Subscription Flows for Existing_Clients', { retries: 0 }, () => {
         })
         //Click Start Plan
         billingPage.clickStartPlan('professional', 'yearly')
-        billingPage.validateToastMsg('Subscription plan updated successfully')
+        cy.verifyToast('Subscription plan updated successfully')
         //Validate applied plan
         billingPage.validateAppliedPlan('professional')
         //Go to Billing Detail
@@ -811,7 +808,7 @@ describe('Subscription Flows for Existing_Clients', { retries: 0 }, () => {
                 })
                 //Click Start Plan
                 billingPage.clickStartPlan('essentials', 'monthly')
-                billingPage.validateToastMsg('Subscription plan updated successfully')
+                cy.verifyToast('Subscription plan updated successfully')
                 //Validate applied plan
                 billingPage.validateAppliedPlan('essentials')
                 //Go to Billing Detail
@@ -884,7 +881,7 @@ describe('Subscription Flows for Existing_Clients', { retries: 0 }, () => {
                 })
                 //Click Start Plan
                 billingPage.clickStartPlan('essentials', 'monthly')
-                billingPage.validateToastMsg('Subscription plan updated successfully')
+                cy.verifyToast('Subscription plan updated successfully')
                 //Validate applied plan
                 billingPage.validateAppliedPlan('essentials')
                 //Go to Billing Detail
@@ -984,6 +981,4 @@ describe('Subscription Flows for Existing_Clients', { retries: 0 }, () => {
             }
         })
     })
-   
-
 })

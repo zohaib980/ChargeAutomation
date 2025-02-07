@@ -12,14 +12,13 @@ const reuseableCode = new ReuseableCode
 
 describe('Autopayment (Reservation Payment) Settings Functionalities', () => {
 
-    const loginEmail = Cypress.config('users').user1.username
-    const loginPassword = Cypress.config('users').user1.password
+    const loginEmail = Cypress.config('users').user2.username
+    const loginPassword = Cypress.config('users').user2.password
 
     let bSource = 'Direct'
     let propertyName = 'QA Test Property'
 
     beforeEach(() => {
-        cy.visit('/')
         loginPage.happyLogin(loginEmail, loginPassword)
     })
     it('CA_AP_09 - Validate Reservation Payment functionality on a booking source using % of Booking Amount appylying Immediately after booking', () => {
@@ -38,7 +37,7 @@ describe('Autopayment (Reservation Payment) Settings Functionalities', () => {
         let amountTypePaymentSelect = '100' //100%
         let reservation_authTime = '0' //Collect When: Immediately 0
         let reservation_chargeOption = '1' //when to charge: after booking 1
-        autoPayments.enableReservationPayment(bSource,amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
+        autoPayments.enableReservationPayment(bSource, amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
         //Enable a Booking Source
         autoPayments.enableBookingSource(bSource)
 
@@ -52,7 +51,7 @@ describe('Autopayment (Reservation Payment) Settings Functionalities', () => {
         bookingPage.validateStatus('Reservation Charge', 'Overdue')
         //Validate trx Amount
         bookingPage.valiateTrxAmount('Reservation Charge', '100')
-        
+
     })
     it('CA_AP_10 - Validate Reservation Payment functionality on a booking source using % of Booking (50%) Amount appylying 3 hours after booking', () => {
 
@@ -64,7 +63,7 @@ describe('Autopayment (Reservation Payment) Settings Functionalities', () => {
         let amountTypePaymentSelect = '50' //50%
         let reservation_authTime = '10800' //Collect When: 3 hours
         let reservation_chargeOption = '1' //when to charge: after booking 
-        autoPayments.enableReservationPayment(bSource,amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
+        autoPayments.enableReservationPayment(bSource, amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
         //Enable a Booking Source
         autoPayments.enableBookingSource(bSource)
 
@@ -78,7 +77,7 @@ describe('Autopayment (Reservation Payment) Settings Functionalities', () => {
         bookingPage.validateStatus('Reservation Charge', 'Scheduled')
         //Validate trx Amount
         bookingPage.valiateTrxAmount('Reservation Charge', '50')
-        
+
     })
     it('CA_AP_11 - Validate Reservation Payment functionality on a booking source using % of Booking (100%) Amount appylying Immediately before checkin in Future day booking', () => {
 
@@ -96,7 +95,7 @@ describe('Autopayment (Reservation Payment) Settings Functionalities', () => {
         let amountTypePaymentSelect = '100' //100%
         let reservation_authTime = '0' //Collect When: Immediately 0
         let reservation_chargeOption = '2' //when to charge: Before check-in
-        autoPayments.enableReservationPayment(bSource,amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
+        autoPayments.enableReservationPayment(bSource, amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
         //Enable a Booking Source
         autoPayments.enableBookingSource(bSource)
 
@@ -111,7 +110,7 @@ describe('Autopayment (Reservation Payment) Settings Functionalities', () => {
         bookingPage.validateStatus('Reservation Charge', 'Scheduled')
         //Validate trx Amount
         bookingPage.valiateTrxAmount('Reservation Charge', '100')
-        
+
     })
     it('CA_AP_12 - Validate Reservation Payment functionality on a booking source using % of Booking (100%) Amount appylying Immediately before checkin in sameday booking', () => {
 
@@ -129,7 +128,7 @@ describe('Autopayment (Reservation Payment) Settings Functionalities', () => {
         let amountTypePaymentSelect = '100' //100%
         let reservation_authTime = '0' //Collect When: Immediately 0
         let reservation_chargeOption = '2' //when to charge: Before check-in
-        autoPayments.enableReservationPayment(bSource,amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
+        autoPayments.enableReservationPayment(bSource, amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
         autoPayments.clickEditBS(bSource) //Edit BS
         //Enable Security Deposit
         let sd_amountType = '1' //How much to authorize? Fixed amount
@@ -152,7 +151,7 @@ describe('Autopayment (Reservation Payment) Settings Functionalities', () => {
         bookingPage.validateStatus('Security Deposit', 'Overdue')
         //Validate trx Amount
         bookingPage.valiateTrxAmount('Reservation Charge', '100')
-        
+
     })
     it('CA_AP_13 - Validate Reservation Payment functionality on a booking source using % of Booking (60%) Amount appylying 10 Hours before checkin on future day booking', () => {
 
@@ -170,7 +169,7 @@ describe('Autopayment (Reservation Payment) Settings Functionalities', () => {
         let amountTypePaymentSelect = '60' //60%
         let reservation_authTime = '36000' //Collect When: 10 hours
         let reservation_chargeOption = '2' //when to charge: Before check-in
-        autoPayments.enableReservationPayment(bSource,amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
+        autoPayments.enableReservationPayment(bSource, amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
         autoPayments.clickEditBS(bSource) //Edit BS
         //Enable Security Deposit
         let sd_amountType = '1' //How much to authorize? Fixed amount
@@ -194,7 +193,7 @@ describe('Autopayment (Reservation Payment) Settings Functionalities', () => {
         bookingPage.validateStatus('Security Deposit', 'Scheduled')
         //Validate trx Amount
         bookingPage.valiateTrxAmount('Reservation Charge', '100') //will be created of full amount as (%age of booking charge + Immediately before checkin) will be on the same day. 
-        
+
     })
     it('CA_AP_14 - Validate Reservation Payment functionality on a booking source as per First Night Amount appylying Immediately after booking', () => {
 
@@ -212,7 +211,7 @@ describe('Autopayment (Reservation Payment) Settings Functionalities', () => {
         let amountTypePaymentSelect = '100' //100% - not applied here
         let reservation_authTime = '0' //Collect When: Immediately 0
         let reservation_chargeOption = '1' //when to charge: after booking
-        autoPayments.enableReservationPayment(bSource,amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
+        autoPayments.enableReservationPayment(bSource, amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
         //Enable a Booking Source
         autoPayments.enableBookingSource(bSource)
 
@@ -227,7 +226,7 @@ describe('Autopayment (Reservation Payment) Settings Functionalities', () => {
         bookingPage.validateStatus('Reservation Charge', 'Overdue')
         //Validate trx Amount
         bookingPage.valiateTrxAmount('Reservation Charge', '20.00')
-        
+
     })
     it('CA_AP_15 - Validate Reservation Payment functionality on a booking source as per First Night Amount appylying 2 days after booking', () => {
 
@@ -245,7 +244,7 @@ describe('Autopayment (Reservation Payment) Settings Functionalities', () => {
         let amountTypePaymentSelect = '100' //100% - not applied here
         let reservation_authTime = '172800' //Collect When: 2 days
         let reservation_chargeOption = '1' //when to charge: after booking
-        autoPayments.enableReservationPayment(bSource,amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
+        autoPayments.enableReservationPayment(bSource, amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
         autoPayments.clickEditBS(bSource) //Edit BS
         //Enable Security Deposit
         let sd_amountType = '1' //How much to authorize? Fixed amount
@@ -268,7 +267,7 @@ describe('Autopayment (Reservation Payment) Settings Functionalities', () => {
         bookingPage.validateStatus('Security Deposit', 'Scheduled')
         //Validate trx Amount
         bookingPage.valiateTrxAmount('Reservation Charge', '100') // the RC as per first night and remaining RC combine together and shows as single RC
-        bookingPage.valiateTrxAmount('Authorization', '150') 
+        bookingPage.valiateTrxAmount('Authorization', '150')
     })
     it('CA_AP_16 - Validate Reservation Payment functionality on a booking source as per First Night Amount Immediately before checkin', () => {
 
@@ -286,7 +285,7 @@ describe('Autopayment (Reservation Payment) Settings Functionalities', () => {
         let amountTypePaymentSelect = '100' //100% - not applied here
         let reservation_authTime = '0' //Collect When: Immediately
         let reservation_chargeOption = '2' //when to charge: before checkin
-        autoPayments.enableReservationPayment(bSource,amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
+        autoPayments.enableReservationPayment(bSource, amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
         autoPayments.clickEditBS(bSource) //Edit BS
         //Enable Security Deposit
         let sd_amountType = '1' //How much to authorize? Fixed amount
@@ -309,7 +308,7 @@ describe('Autopayment (Reservation Payment) Settings Functionalities', () => {
         bookingPage.validateStatus('Security Deposit', 'Scheduled')
         //Validate trx Amount
         bookingPage.valiateTrxAmount('Reservation Charge', '100') // the RC as per first night and remaining RC combine together and shows as single RC
-        bookingPage.valiateTrxAmount('Authorization', '150') 
+        bookingPage.valiateTrxAmount('Authorization', '150')
     })
     it('CA_AP_17 - Validate Reservation Payment functionality on a booking source as per First Night Amount 5 days before checkin', () => {
 
@@ -327,7 +326,7 @@ describe('Autopayment (Reservation Payment) Settings Functionalities', () => {
         let amountTypePaymentSelect = '100' //100% - not applied here
         let reservation_authTime = '432000' //Collect When: 5 days
         let reservation_chargeOption = '2' //when to charge: before checkin
-        autoPayments.enableReservationPayment(bSource,amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
+        autoPayments.enableReservationPayment(bSource, amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
         autoPayments.clickEditBS(bSource) //Edit BS
         //Enable Security Deposit
         let sd_amountType = '1' //How much to authorize? Fixed amount
@@ -368,10 +367,10 @@ describe('Autopayment (Reservation Payment) Settings Functionalities', () => {
         let amountTypePaymentSelect = '100' //100%
         let reservation_authTime = '0' //Collect When: Immediately 0
         let reservation_chargeOption = '1' //when to charge: after booking 1
-        autoPayments.enableReservationPayment(bSource,amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
+        autoPayments.enableReservationPayment(bSource, amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
         //Enable ChargeBack Protection on Reservsation Charge
         autoPayments.clickEditBS(bSource) //Edit BS
-        autoPayments.enableProtectionOnReservationPayment(bSource) 
+        autoPayments.enableProtectionOnReservationPayment(bSource)
         //Enable a Booking Source
         autoPayments.enableBookingSource(bSource)
 
@@ -386,9 +385,10 @@ describe('Autopayment (Reservation Payment) Settings Functionalities', () => {
         //Validate trx Amount
         bookingPage.valiateTrxAmount('Reservation Charge', '100')
         //Add a Credit Card on new booking
-        bookingPage.addCCOnNewBooking()
+        bookingPage.addCCOnNewBooking('4242424242424242')
+        cy.verifyToast('Card added successfully')
         //Validate 3DS authentication toast
-        bookingPage.validate3DSAuthenticationToast()
+        cy.verifyToast('This card is protected with 3DS authentication, please authenticate your transaction')
         //Validate status
         bookingPage.validateStatus('Reservation Charge', 'Awaiting Approval')
         autoPayments.gotoAutopayments()
@@ -396,4 +396,4 @@ describe('Autopayment (Reservation Payment) Settings Functionalities', () => {
         autoPayments.clickEditBS(bSource) //Edit BS
         autoPayments.disableProtectionOnReservationPayment(bSource)
     })
-    })
+})

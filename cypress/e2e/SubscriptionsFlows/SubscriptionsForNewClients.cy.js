@@ -20,16 +20,14 @@ describe('Subscription Flows for New_Clients', { retries: 0 }, () => {
     const loginPassword = Cypress.config('users').user2.password
 
     beforeEach(() => {
-        //cy.visit('/')
         //loginPage.happyLogin(loginEmail, loginPassword)
     })
-
     it('CA_NSUB_01 - Verify that a new client receives a 7-day free trial on any plan.', () => {
 
         let clientName = reuseableCode.getRandomFirstName()
         let companyName = 'QATestCompany'
         let phoneNo = reuseableCode.getRandomPhoneNumber()
-        let clientEmail = reuseableCode.generateRandomString(10) + '@sharklasers.com'
+        let clientEmail = reuseableCode.generateRandomString(10) + '@yopmail.com'
         let clientPassword = 'Boring321'
         let planType = 'essentials_yearly' //essentials_yearly, essentials_monthly, professional_yearly, professional_monthly, basic
 
@@ -38,12 +36,8 @@ describe('Subscription Flows for New_Clients', { retries: 0 }, () => {
         //Register New User
         registration.newRegistration(clientName, companyName, phoneNo, clientEmail, clientPassword, planType)
 
-        //Verify new User email
-        registration.goToGuerrillaMail(clientEmail)
-        registration.verifyGuerrillaMail(clientEmail, 7) //Max attempts
-
-        cy.visit('/')
-        loginPage.simpleLogin(clientEmail, clientPassword)
+        registration.verifyEmailFromSMTP(clientEmail)
+        loginPage.happyLogin(clientEmail, clientPassword)
 
         //Validate trial ending date
         billingPage.validateTrialEndDate()
@@ -65,14 +59,13 @@ describe('Subscription Flows for New_Clients', { retries: 0 }, () => {
         cy.get('@accountId').then(accountId => {
             registration.deleteUserAccount(accountId)
         })
-
     })
     it('CA_NSUB_02 - When new user having a trial, try to switch to another plan by adding a valid CC $1 authentication will be applied and user will moved to desired plan', () => {
 
         let clientName = reuseableCode.getRandomFirstName()
         let companyName = 'QATestCompany'
         let phoneNo = reuseableCode.getRandomPhoneNumber()
-        let clientEmail = reuseableCode.generateRandomString(10) + '@sharklasers.com'
+        let clientEmail = reuseableCode.generateRandomString(10) + '@yopmail.com'
         let clientPassword = 'Boring321'
         let planType = 'basic' //essentials_yearly, essentials_monthly, professional_yearly, professional_monthly, basic
         const desiredPlan = 'essentials'
@@ -81,12 +74,9 @@ describe('Subscription Flows for New_Clients', { retries: 0 }, () => {
         //Register New User
         registration.newRegistration(clientName, companyName, phoneNo, clientEmail, clientPassword, planType)
 
-        //Verify new User email
-        registration.goToGuerrillaMail(clientEmail)
-        registration.verifyGuerrillaMail(clientEmail, 7) //Max attempts
+        registration.verifyEmailFromSMTP(clientEmail)
 
-        cy.visit('/')
-        loginPage.simpleLogin(clientEmail, clientPassword)
+        loginPage.happyLogin(clientEmail, clientPassword)
 
         //Validate 7 day trial ending date
         billingPage.validateTrialEndDate()
@@ -98,14 +88,14 @@ describe('Subscription Flows for New_Clients', { retries: 0 }, () => {
 
         //Subscribe to a plan
         billingPage.selectMonthlyPlanForNewUser(desiredPlan, '4000000000003220')
-        billingPage.validateToastMsg('Please approve the transaction')
+        cy.verifyToast('Please approve the transaction')
 
         billingPage.approve3DS()
-        billingPage.validateToastMsg('Subscription plan updated successfully')
+        cy.verifyToast('Subscription plan updated successfully')
 
         cy.wait(15000)
         //Validate that after 3DS approval, card is added and 1$ auth is applied
-        cy.request('GET', 'https://master.chargeautomation.com/client/v2/client-payment-method-details').then(response => {
+        cy.request('GET', '/client/v2/client-payment-method-details').then(response => {
             expect(response.status).to.eq(200)
             cy.log(response.body)
             expect(response.body.data).to.have.property('is_card_available', true)
@@ -135,7 +125,7 @@ describe('Subscription Flows for New_Clients', { retries: 0 }, () => {
         let clientName = reuseableCode.getRandomFirstName()
         let companyName = 'QATestCompany'
         let phoneNo = reuseableCode.getRandomPhoneNumber()
-        let clientEmail = reuseableCode.generateRandomString(10) + '@sharklasers.com'
+        let clientEmail = reuseableCode.generateRandomString(10) + '@yopmail.com'
         let clientPassword = 'Boring321'
         let planType = 'basic' //essentials_yearly, essentials_monthly, professional_yearly, professional_monthly, basic
         const desiredPlan = 'essentials'
@@ -145,12 +135,9 @@ describe('Subscription Flows for New_Clients', { retries: 0 }, () => {
         //Register New User
         registration.newRegistration(clientName, companyName, phoneNo, clientEmail, clientPassword, planType)
 
-        //Verify new User email
-        registration.goToGuerrillaMail(clientEmail)
-        registration.verifyGuerrillaMail(clientEmail, 7) //Max attempts
+        registration.verifyEmailFromSMTP(clientEmail)
 
-        cy.visit('/')
-        loginPage.simpleLogin(clientEmail, clientPassword)
+        loginPage.happyLogin(clientEmail, clientPassword)
 
         //Validate 7 day trial ending date
         billingPage.validateTrialEndDate()
@@ -162,16 +149,16 @@ describe('Subscription Flows for New_Clients', { retries: 0 }, () => {
 
         //Subscribe to a plan
         billingPage.selectMonthlyPlanForNewUser(desiredPlan, '4000000000003220')
-        billingPage.validateToastMsg('Please approve the transaction')
+        cy.verifyToast('Please approve the transaction')
 
         billingPage.fail3DS()
-        billingPage.validateToastMsg('We are unable to authenticate your payment method')
+        cy.verifyToast('We are unable to authenticate your payment method')
         //close subscription modal
         billingPage.closeSubscModal()
 
         cy.wait(20000)
         //Validate that after 3DS failure, card is added and no 1$ auth is applied
-        cy.request('GET', 'https://master.chargeautomation.com/client/v2/client-payment-method-details').then(response => {
+        cy.request('GET', '/client/v2/client-payment-method-details').then(response => {
             expect(response.status).to.eq(200)
             cy.log(response.body)
             expect(response.body.data).not.to.have.property('is_card_available')
@@ -201,7 +188,7 @@ describe('Subscription Flows for New_Clients', { retries: 0 }, () => {
         let clientName = reuseableCode.getRandomFirstName()
         let companyName = 'QATestCompany'
         let phoneNo = reuseableCode.getRandomPhoneNumber()
-        let clientEmail = reuseableCode.generateRandomString(10) + '@sharklasers.com'
+        let clientEmail = reuseableCode.generateRandomString(10) + '@yopmail.com'
         let clientPassword = 'Boring321'
         let planType = 'basic' //essentials_yearly, essentials_monthly, professional_yearly, professional_monthly, basic
         const desiredPlan = 'essentials'
@@ -211,12 +198,9 @@ describe('Subscription Flows for New_Clients', { retries: 0 }, () => {
         //Register New User
         registration.newRegistration(clientName, companyName, phoneNo, clientEmail, clientPassword, planType)
 
-        //Verify new User email
-        registration.goToGuerrillaMail(clientEmail)
-        registration.verifyGuerrillaMail(clientEmail, 7) //Max attempts
+        registration.verifyEmailFromSMTP(clientEmail)
 
-        cy.visit('/')
-        loginPage.simpleLogin(clientEmail, clientPassword)
+        loginPage.happyLogin(clientEmail, clientPassword)
 
         //Validate 7 day trial ending date
         //billingPage.validateTrialEndDate() //it was continue failing on pipeline due to timezone differnce
@@ -228,11 +212,11 @@ describe('Subscription Flows for New_Clients', { retries: 0 }, () => {
 
         //Subscribe to a plan
         billingPage.selectMonthlyPlanForNewUser(desiredPlan, '4242424242424242')
-        billingPage.validateToastMsg('Subscription plan updated successfully')
+        cy.verifyToast('Subscription plan updated successfully')
 
         cy.wait(15000)
         //Validate that card is added and 1$ auth is applied
-        cy.request('GET', 'https://master.chargeautomation.com/client/v2/client-payment-method-details').then(response => {
+        cy.request('GET', '/client/v2/client-payment-method-details').then(response => {
             expect(response.status).to.eq(200)
             cy.log(response.body)
             expect(response.body.data).to.have.property('is_card_available', true)
@@ -279,7 +263,7 @@ describe('Subscription Flows for New_Clients', { retries: 0 }, () => {
         let clientName = reuseableCode.getRandomFirstName()
         let companyName = 'QATestCompany'
         let phoneNo = reuseableCode.getRandomPhoneNumber()
-        let clientEmail = reuseableCode.generateRandomString(10) + '@sharklasers.com'
+        let clientEmail = reuseableCode.generateRandomString(10) + '@yopmail.com'
         let clientPassword = 'Boring321'
         let planType = 'basic' //essentials_yearly, essentials_monthly, professional_yearly, professional_monthly, basic
         const desiredPlan = 'essentials'
@@ -289,12 +273,9 @@ describe('Subscription Flows for New_Clients', { retries: 0 }, () => {
         //Register New User
         registration.newRegistration(clientName, companyName, phoneNo, clientEmail, clientPassword, planType)
 
-        //Verify new User email
-        registration.goToGuerrillaMail(clientEmail)
-        registration.verifyGuerrillaMail(clientEmail, 7) //Max attempts
+        registration.verifyEmailFromSMTP(clientEmail)
 
-        cy.visit('/')
-        loginPage.simpleLogin(clientEmail, clientPassword)
+        loginPage.happyLogin(clientEmail, clientPassword)
 
         //Validate 7 day trial ending date
         billingPage.validateTrialEndDate()
@@ -306,14 +287,14 @@ describe('Subscription Flows for New_Clients', { retries: 0 }, () => {
 
         //Subscribe to a plan
         billingPage.selectMonthlyPlanForNewUser(desiredPlan, '4000000000003220')
-        billingPage.validateToastMsg('Please approve the transaction')
+        cy.verifyToast('Please approve the transaction')
 
         billingPage.approve3DS()
-        billingPage.validateToastMsg('Subscription plan updated successfully')
+        cy.verifyToast('Subscription plan updated successfully')
 
         cy.wait(15000)
         //Validate that after 3DS approval, card is added and 1$ auth is applied
-        cy.request('GET', 'https://master.chargeautomation.com/client/v2/client-payment-method-details').then(response => {
+        cy.request('GET', '/client/v2/client-payment-method-details').then(response => {
             expect(response.status).to.eq(200)
             cy.log(response.body)
             expect(response.body.data).to.have.property('is_card_available', true)
@@ -338,14 +319,20 @@ describe('Subscription Flows for New_Clients', { retries: 0 }, () => {
             //end user trial
             pmsConnect.endUserTrial(apiKey)
         })
-        dashboard.goToDashboard()
+        //dashboard.goToDashboard()
         //validate that Invoice is created within 5 min & Pending info message is shown on the header top
-        billingPage.validateOutstandingInvoice(30) //attemps after every 10 sec
-
+        //billingPage.validateOutstandingInvoiceMsg(30) //attemps after every 10 sec
+        
+        cy.wait(120000) //2 min
         //If card is available user will stay on same plan 
         billingPage.gotoBilling()
         billingPage.getActiveSubscription().then(activePlan => {
-            expect(activePlan.toLowerCase()).to.include(desiredPlan.toLowerCase().replace(/_/g, ' ')) //new plan will be subscribed
+            expect(activePlan.toLowerCase()).to.include(desiredPlan.toLowerCase().replace(/_/g, ' ')) 
+        })
+        cy.reload()
+        //Validate the pending invoice is created
+        cy.get('@estimatedCharge').then(estimatedCharge => {
+            billingPage.validatePendingInvoiceAmount(estimatedCharge)
         })
 
         //Get Account ID from Profile
@@ -365,7 +352,7 @@ describe('Subscription Flows for New_Clients', { retries: 0 }, () => {
         let clientName = reuseableCode.getRandomFirstName()
         let companyName = 'QATestCompany'
         let phoneNo = reuseableCode.getRandomPhoneNumber()
-        let clientEmail = reuseableCode.generateRandomString(10) + '@sharklasers.com'
+        let clientEmail = reuseableCode.generateRandomString(10) + '@yopmail.com'
         let clientPassword = 'Boring321'
         let planType = 'essentials_monthly' //essentials_yearly, essentials_monthly, professional_yearly, professional_monthly, basic
 
@@ -374,19 +361,16 @@ describe('Subscription Flows for New_Clients', { retries: 0 }, () => {
         //Register New User
         registration.newRegistration(clientName, companyName, phoneNo, clientEmail, clientPassword, planType)
 
-        //Verify new User email
-        registration.goToGuerrillaMail(clientEmail)
-        registration.verifyGuerrillaMail(clientEmail, 7) //Max attempts
+        registration.verifyEmailFromSMTP(clientEmail)
 
-        cy.visit('/')
-        loginPage.simpleLogin(clientEmail, clientPassword)
+        loginPage.happyLogin(clientEmail, clientPassword)
 
         //Validate 7 day trial ending date
         billingPage.validateTrialEndDate()
 
         cy.wait(15000)
         //Validate that there is no card on file
-        cy.request('GET', 'https://master.chargeautomation.com/client/v2/client-payment-method-details').then(response => {
+        cy.request('GET', '/client/v2/client-payment-method-details').then(response => {
             expect(response.status).to.eq(200)
             cy.log(response.body)
             expect(response.body.data).not.to.have.property('is_card_available', true)
@@ -431,12 +415,12 @@ describe('Subscription Flows for New_Clients', { retries: 0 }, () => {
         })
 
     })
-    it('CA_NSUB_07 - Verify that the old plan is canceled and a new subscription is created when switching plans within the 7-day period', () => {
+    it('CA_NSUB_07 - Verify that the old plan is canceled and a new subscription is created when user switchs plan within the 7-day period', () => {
 
         let clientName = reuseableCode.getRandomFirstName()
         let companyName = 'QATestCompany'
         let phoneNo = reuseableCode.getRandomPhoneNumber()
-        let clientEmail = reuseableCode.generateRandomString(10) + '@sharklasers.com'
+        let clientEmail = reuseableCode.generateRandomString(10) + '@yopmail.com'
         let clientPassword = 'Boring321'
         let planType = 'essentials_monthly' //essentials_yearly, essentials_monthly, professional_yearly, professional_monthly, basic
         const desiredPlan = 'professional'
@@ -446,13 +430,9 @@ describe('Subscription Flows for New_Clients', { retries: 0 }, () => {
         //Register New User
         registration.newRegistration(clientName, companyName, phoneNo, clientEmail, clientPassword, planType)
 
+        registration.verifyEmailFromSMTP(clientEmail)
 
-        //Verify new User email
-        registration.goToGuerrillaMail(clientEmail)
-        registration.verifyGuerrillaMail(clientEmail, 7) //Max attempts
-
-        cy.visit('/')
-        loginPage.simpleLogin(clientEmail, clientPassword)
+        loginPage.happyLogin(clientEmail, clientPassword)
 
         //Validate 7 day trial ending date
         billingPage.validateTrialEndDate()
@@ -467,11 +447,11 @@ describe('Subscription Flows for New_Clients', { retries: 0 }, () => {
         billingPage.gotoSubscriptionPlans()
         billingPage.selectBillMonthly()
         billingPage.selectMonthlyPlanForNewUser(desiredPlan, '4242424242424242')
-        billingPage.validateToastMsg('Subscription plan updated successfully')
+        cy.verifyToast('Subscription plan updated successfully')
 
         cy.wait(15000)
         //Validate that card is added and 1$ auth is applied
-        cy.request('GET', 'https://master.chargeautomation.com/client/v2/client-payment-method-details').then(response => {
+        cy.request('GET', '/client/v2/client-payment-method-details').then(response => {
             expect(response.status).to.eq(200)
             cy.log(response.body)
             expect(response.body.data).to.have.property('is_card_available', true)
@@ -499,7 +479,7 @@ describe('Subscription Flows for New_Clients', { retries: 0 }, () => {
         let clientName = reuseableCode.getRandomFirstName()
         let companyName = 'QATestCompany'
         let phoneNo = reuseableCode.getRandomPhoneNumber()
-        let clientEmail = reuseableCode.generateRandomString(10) + '@sharklasers.com'
+        let clientEmail = reuseableCode.generateRandomString(10) + '@yopmail.com'
         let clientPassword = 'Boring321'
         let planType = 'basic' //essentials_yearly, essentials_monthly, professional_yearly, professional_monthly, basic
 
@@ -507,13 +487,10 @@ describe('Subscription Flows for New_Clients', { retries: 0 }, () => {
         registration.goToRegistration()
         //Register New User
         registration.newRegistration(clientName, companyName, phoneNo, clientEmail, clientPassword, planType)
-
-        //Verify new User email
-        registration.goToGuerrillaMail(clientEmail)
-        registration.verifyGuerrillaMail(clientEmail, 5) //Max attempts
+        
+        registration.verifyEmailFromSMTP(clientEmail)
             
-        cy.visit('/')
-        loginPage.simpleLogin(clientEmail, clientPassword)
+        loginPage.happyLogin(clientEmail, clientPassword)
 
         //Validate 7 day trial ending date
         billingPage.validateTrialEndDate()
@@ -549,7 +526,7 @@ describe('Subscription Flows for New_Clients', { retries: 0 }, () => {
         })
         //Click Start Plan
         billingPage.clickStartPlan('essentials', 'monthly')
-        billingPage.validateToastMsg('Please approve pending transactions')
+        cy.verifyToast('Please approve pending transactions')
         cy.wait(5000) //wait for 3ds modal to appear
         cy.reload()
 
@@ -565,7 +542,7 @@ describe('Subscription Flows for New_Clients', { retries: 0 }, () => {
 
         //validate that Invoice is created within 5 min & Pending info message is shown on the header top
         //dashboard.goToDashboard()
-        //billingPage.validateOutstandingInvoice(30) //attemps after every 10 sec
+        //billingPage.validateOutstandingInvoiceMsg(30) //attemps after every 10 sec
 
         //Pay pending invoices
         billingPage.gotoBilling()
@@ -588,5 +565,8 @@ describe('Subscription Flows for New_Clients', { retries: 0 }, () => {
             registration.deleteUserAccount(accountId)
         })
 
+    })
+    xit('endTrial', ()=>{
+        pmsConnect.endUserTrial('6bd36080-b91d-11ef-8832-13d06c7d4a48') //apiKey
     })
 })

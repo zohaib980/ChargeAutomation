@@ -12,14 +12,13 @@ const reuseableCode = new ReuseableCode
 
 describe('Create, Delete & Copy Booking Source Cases', () => {
 
-    const loginEmail = Cypress.config('users').user1.username
-    const loginPassword = Cypress.config('users').user1.password
+    const loginEmail = Cypress.config('users').user2.username
+    const loginPassword = Cypress.config('users').user2.password
 
     let bSource = 'Direct'
     let propertyName = 'QA Test Property'
 
     beforeEach(() => {
-        cy.visit('/')
         loginPage.happyLogin(loginEmail, loginPassword)
     })
     it('CA_AP_31 - Create a new Booking Source', () => {
@@ -142,7 +141,8 @@ describe('Create, Delete & Copy Booking Source Cases', () => {
         bookingPage.addNewBookingAndValidate(propertyName, bSource, adults, child)
         bookingPage.validateReservationChgStatus('Not Enabled')
         //Validate tooltip message
-        bookingPage.validateRCTooltipMsg('Booking was created before Autopayment was enabled for '+bSource)
+        bookingPage.validateRCTooltipMsg('Auto Payments is not enabled for '+bSource)
+        bookingPage.validateRCTooltipMsg('Apply Auto Payment') 
     })
     it('CA_AP_39 - Validate that If RC is disabled on enabled BS than on creating a new booking the RC status will be "not enabled"', () => {
         let bSource = 'TestBS'

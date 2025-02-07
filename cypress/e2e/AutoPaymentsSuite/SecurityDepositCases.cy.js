@@ -12,14 +12,13 @@ const reuseableCode = new ReuseableCode
 
 describe('Autopayment (Security Deposit) Settings Functionalities', () => {
 
-    const loginEmail = Cypress.config('users').user1.username
-    const loginPassword = Cypress.config('users').user1.password
+    const loginEmail = Cypress.config('users').user2.username
+    const loginPassword = Cypress.config('users').user2.password
 
     let bSource = 'Direct'
     let propertyName = 'QA Test Property'
 
     beforeEach(() => {
-        cy.visit('/')
         loginPage.happyLogin(loginEmail, loginPassword)
     })
     it('CA_AP_19 - Validate Security Deposit functionality on a booking source using Fixed Amount appylying Immediately before checkin', () => {
@@ -96,7 +95,7 @@ describe('Autopayment (Security Deposit) Settings Functionalities', () => {
         let adults = reuseableCode.getRandomNumber(1, 7)
         let child = reuseableCode.getRandomNumber(0, 7)
         bookingPage.goToBookingPage()
-        bookingPage.addBookingInFutureDate(propertyName, bSource, adults, child,'2')
+        bookingPage.addBookingInFutureDate(propertyName, bSource, adults, child, '2')
         bookingPage.validateReservationChgStatus('Scheduled')
         bookingPage.validateSDStatus('Overdue')
         bookingPage.expandBooking(0) //expand first booking
@@ -109,9 +108,10 @@ describe('Autopayment (Security Deposit) Settings Functionalities', () => {
         bookingPage.valiateTrxAmount('Security Deposit', '200')
 
         //Add a Credit Card on new booking
-        bookingPage.addCCOnNewBooking()
+        bookingPage.addCCOnNewBooking('4242424242424242')
+        cy.verifyToast('Card added successfully')
         //Validate 3DS authentication toast
-        bookingPage.validate3DSAuthenticationToast()
+        cy.verifyToast('This card is protected with 3DS authentication, please authenticate your transaction')
         //Validate status
         bookingPage.validateStatus('Authorization', 'Authorized')
         bookingPage.validateStatus('Security Deposit', 'Awaiting Approval')
@@ -290,5 +290,4 @@ describe('Autopayment (Security Deposit) Settings Functionalities', () => {
         bookingPage.valiateTrxAmount('Security Deposit', '20.00')
 
     })
-
 })

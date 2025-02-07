@@ -12,14 +12,13 @@ const reuseableCode = new ReuseableCode
 
 describe('Autopayment (Credit card Validation) Settings Functionalities', () => {
 
-    const loginEmail = Cypress.config('users').user1.username
-    const loginPassword = Cypress.config('users').user1.password
+    const loginEmail = Cypress.config('users').user2.username
+    const loginPassword = Cypress.config('users').user2.password
 
     let bSource = 'Direct'
     let propertyName = 'QA Test Property'
 
     beforeEach(() => {
-        cy.visit('/')
         loginPage.happyLogin(loginEmail, loginPassword)
     })
     it('CA_AP_01 - Validate the multiple booking sources on Autopayment rules page', () => {
@@ -69,7 +68,7 @@ describe('Autopayment (Credit card Validation) Settings Functionalities', () => 
         let amountTypePaymentSelect = '100' //100%
         let reservation_authTime = '0' //Collect When: Immediately 0
         let reservation_chargeOption = '1' //when to charge: after booking 1
-        autoPayments.enableReservationPayment(bSource,amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
+        autoPayments.enableReservationPayment(bSource, amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
         autoPayments.clickEditBS(bSource) //Edit BS
         //Disable Reservation Payment
         autoPayments.disableReservationPayment(bSource)
@@ -100,7 +99,7 @@ describe('Autopayment (Credit card Validation) Settings Functionalities', () => 
         let amountTypePaymentSelect = '100' //100%
         let reservation_authTime = '0' //Collect When: Immediately 0
         let reservation_chargeOption = '1' //when to charge: after booking 1
-        autoPayments.enableReservationPayment(bSource,amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
+        autoPayments.enableReservationPayment(bSource, amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
         autoPayments.clickEditBS(bSource) //Edit BS
         //Disable Reservation Payment
         autoPayments.disableReservationPayment(bSource)
@@ -131,7 +130,7 @@ describe('Autopayment (Credit card Validation) Settings Functionalities', () => 
         let amountTypePaymentSelect = '100' //100%
         let reservation_authTime = '0' //Collect When: Immediately: 0
         let reservation_chargeOption = '1' //when to charge: after booking: 1
-        autoPayments.enableReservationPayment(bSource,amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
+        autoPayments.enableReservationPayment(bSource, amountTypePayment, amountTypePaymentSelect, reservation_authTime, reservation_chargeOption)
         autoPayments.clickEditBS(bSource) //Edit BS
         //Disable Reservation Payment
         autoPayments.disableReservationPayment(bSource)
@@ -153,7 +152,7 @@ describe('Autopayment (Credit card Validation) Settings Functionalities', () => 
         //Validate trx Amount
         bookingPage.valiateTrxAmount('Authorization', '100')
     })
-    it('CA_AP_06 - Validate "CC validation" functionality on a booking source by "First Night" and authorizing it after "Immediately"', ()=>{
+    it('CA_AP_06 - Validate "CC validation" functionality on a booking source by "First Night" and authorizing it after "Immediately"', () => {
         autoPayments.gotoAutopayments()
         autoPayments.validateWarningPopup() //Warning popup
         autoPayments.clickEditBS(bSource) //Edit BS
@@ -178,7 +177,7 @@ describe('Autopayment (Credit card Validation) Settings Functionalities', () => 
         bookingPage.valiateTrxAmount('Authorization', '20.00')
 
     })
-    it('CA_AP_07 - Validate "CC validation" functionality on a booking source by "First Night" and authorizing it after "10 Hours"', ()=>{
+    it('CA_AP_07 - Validate "CC validation" functionality on a booking source by "First Night" and authorizing it after "10 Hours"', () => {
         autoPayments.gotoAutopayments()
         autoPayments.validateWarningPopup() //Warning popup
         autoPayments.clickEditBS(bSource) //Edit BS
@@ -230,9 +229,10 @@ describe('Autopayment (Credit card Validation) Settings Functionalities', () => 
         //Validate trx Amount
         bookingPage.valiateTrxAmount('Authorization', '150')
         //Add a Credit Card on new booking
-        bookingPage.addCCOnNewBooking()
+        bookingPage.addCCOnNewBooking('4242424242424242')
+        cy.verifyToast('Card added successfully')
         //Validate 3DS authentication toast
-        bookingPage.validate3DSAuthenticationToast()
+        cy.verifyToast('This card is protected with 3DS authentication, please authenticate your transaction')
         //Validate status
         bookingPage.validateStatus('Authorization', 'Awaiting Approval')
         autoPayments.gotoAutopayments()
@@ -240,5 +240,5 @@ describe('Autopayment (Credit card Validation) Settings Functionalities', () => 
         autoPayments.clickEditBS(bSource) //Edit BS
         autoPayments.disableProtectionCCValidation(bSource)
     })
-    
+
 })

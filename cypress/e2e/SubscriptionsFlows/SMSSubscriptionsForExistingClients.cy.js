@@ -6,13 +6,12 @@ import { BillingPage } from "../../../pageObjects/BillingPage"
 const loginPage = new LoginPage
 const billingPage = new BillingPage
 
-describe('SMS Subscription Flows for Existing_Clients', { retries: 0 }, () => {
+describe('SMS Subscription Flows for Existing_Clients', { retries: 1 }, () => {
 
     const loginEmail = Cypress.config('users').user2.username
     const loginPassword = Cypress.config('users').user2.password
 
     beforeEach(() => {
-        cy.visit('/')
         loginPage.happyLogin(loginEmail, loginPassword)
     })
 
@@ -41,7 +40,7 @@ describe('SMS Subscription Flows for Existing_Clients', { retries: 0 }, () => {
             expect(currentAddOn).to.include(desiredPlan)
         })
     })
-    it('CA_sSUB_02 - Apply and validate 500 Messages $29 SMS Plan on existing client using non-3DS card', () => {
+    it('CA_SSUB_02 - Apply and validate 500 Messages $29 SMS Plan on existing client using non-3DS card', () => {
         //Go to billing page
         billingPage.gotoBilling()
         //Select Valid Credit card
@@ -116,7 +115,7 @@ describe('SMS Subscription Flows for Existing_Clients', { retries: 0 }, () => {
             expect(currentAddOn).to.include(desiredPlan)
         })
     })
-    xit('CA_SSUB_05 - Client Try to subscribe a SMS plan using declined non-3DS card', () => {
+    it('CA_SSUB_05 - Client Try to subscribe a SMS plan using declined non-3DS card', () => {
         //Go to billing page
         billingPage.gotoBilling()
         //Select declined Credit card
@@ -166,14 +165,17 @@ describe('SMS Subscription Flows for Existing_Clients', { retries: 0 }, () => {
             if (currentPlan.includes('($99)')) {
                 let desiredPlan = '$29'
                 billingPage.smsPlanSubscriptionAPI("price_1KGS4rKh4TiALV2u9eB2fBwb") //'$29' plan
+                cy.visit('/client/v2/billing')
+                billingPage.gotoBillingDetail()
+                billingPage.verifyActivatedSMSAddons(desiredPlan)
             }
             else {
                 let desiredPlan = '$99'
                 billingPage.smsPlanSubscriptionAPI("price_1KGS6pKh4TiALV2ubtJkL6yN") //'$99' plan
+                cy.visit('/client/v2/billing')
+                billingPage.gotoBillingDetail()
+                billingPage.verifyActivatedSMSAddons(desiredPlan)
             }
-            cy.visit('https://master.chargeautomation.com/client/v2/billing')
-            billingPage.gotoBillingDetail()
-
         })
     })
 
